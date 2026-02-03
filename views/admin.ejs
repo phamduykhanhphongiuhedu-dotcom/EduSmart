@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>Trang Quản Trị Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light p-5">
+    <div class="container bg-white p-4 rounded-4 shadow-sm">
+        <h2 class="fw-bold mb-4 text-primary"><i class="fas fa-user-shield"></i> Duyệt hồ sơ KYC</h2>
+        
+        <% if(pendingUsers.length === 0) { %>
+            <div class="alert alert-success">Hiện tại không có hồ sơ nào cần duyệt.</div>
+        <% } else { %>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Họ tên</th>
+                        <th>Loại đối tượng</th>
+                        <th>Thông tin hồ sơ</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% pendingUsers.forEach(u => { %>
+                        <% const kycData = JSON.parse(u.kyc_data || '{}'); %>
+                        <tr>
+                            <td><%= u.custom_id %></td>
+                            <td class="fw-bold"><%= u.nickname %></td>
+                            <td>
+                                <% if(u.kyc_type == 'student_creator') { %>
+                                    <span class="badge bg-info">Sinh viên bán khóa học</span>
+                                <% } else { %>
+                                    <span class="badge bg-warning text-dark">Giảng viên chuyên nghiệp</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <ul class="small mb-0 list-unstyled">
+                                    <li><b>Mã/CCCD:</b> <%= kycData.document_id %></li>
+                                    <li><b>Link ảnh:</b> <a href="<%= kycData.document_proof %>" target="_blank">Xem ảnh</a></li>
+                                </ul>
+                            </td>
+                            <td>
+                                <form action="/admin/approve" method="POST" class="d-inline">
+                                    <input type="hidden" name="userId" value="<%= u.id %>">
+                                    <button class="btn btn-success btn-sm fw-bold">
+                                        <i class="fas fa-check"></i> Duyệt
+                                    </button>
+                                </form>
+                                <form action="/admin/reject" method="POST" class="d-inline">
+                                    <input type="hidden" name="userId" value="<%= u.id %>">
+                                    <button class="btn btn-danger btn-sm fw-bold">
+                                        <i class="fas fa-times"></i> Từ chối
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } %>
+        
+        <hr>
+        <a href="/" class="btn btn-secondary">Về trang chủ</a>
+    </div>
+</body>
+</html>

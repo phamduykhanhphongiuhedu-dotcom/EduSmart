@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>Quản lý Đào tạo - EduTeacher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        :root { --sidebar-width: 260px; --primary: #4f46e5; --dark: #0f172a; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
+        
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width); height: 100vh; position: fixed; 
+            background: var(--dark); color: #94a3b8; padding: 24px; z-index: 100;
+        }
+        .brand { color: white; font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; text-decoration: none; }
+        
+        .nav-item {
+            padding: 12px 16px; border-radius: 10px; color: #94a3b8; font-weight: 500;
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+            margin-bottom: 5px; transition: 0.2s;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-item.active { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+
+        .main-content { margin-left: var(--sidebar-width); padding: 32px; }
+
+        /* HEADER */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+        .badge-kyc { background: #dcfce7; color: #15803d; border: 1px solid #86efac; padding: 6px 14px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; }
+        .badge-pending { background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; padding: 6px 14px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; }
+
+        /* Cards & Tables */
+        .stat-card { background: white; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02); height: 100%; }
+        .content-card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; height: 100%; margin-bottom: 20px; }
+        .card-header-custom { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .table-custom th { background: #f8fafc; font-size: 0.8rem; text-transform: uppercase; color: #64748b; padding: 16px 24px; font-weight: 700; }
+        .table-custom td { padding: 16px 24px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
+
+        /* Utils */
+        .icon-box { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .bg-purple-light { background: #e0e7ff; color: #4f46e5; }
+        .bg-green-light { background: #dcfce7; color: #16a34a; }
+        .bg-orange-light { background: #ffedd5; color: #ea580c; }
+        .student-avatar { width: 36px; height: 36px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #64748b; margin-right: 12px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <a href="/" class="brand"><i class="fas fa-layer-group"></i> EduTeacher</a>
+        <a href="/teacher?tab=overview" class="nav-item <%= currentTab === 'overview' ? 'active' : '' %>"><i class="fas fa-th-large"></i> Tổng quan</a>
+        <a href="/teacher?tab=courses" class="nav-item <%= currentTab === 'courses' ? 'active' : '' %>"><i class="fas fa-book"></i> Quản lý khóa học</a>
+        <a href="/teacher?tab=students" class="nav-item <%= currentTab === 'students' ? 'active' : '' %>"><i class="fas fa-users"></i> Học viên</a>
+        <a href="/teacher?tab=finance" class="nav-item <%= currentTab === 'finance' ? 'active' : '' %>"><i class="fas fa-wallet"></i> Tài chính</a>
+        <div style="margin-top: auto; padding-top: 100px;">
+            <a href="/logout" class="nav-item text-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <% if(currentTab==='overview'){ %>Bảng điều khiển<% } %>
+                    <% if(currentTab==='courses'){ %>Quản lý khóa học<% } %>
+                    <% if(currentTab==='students'){ %>Danh sách học viên<% } %>
+                    <% if(currentTab==='finance'){ %>Tài chính & Doanh thu<% } %>
+                </h2>
+                <p class="text-muted mb-0">Xin chào, <%= user.nickname %></p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <% if (user.is_verified) { %>
+                    <div class="badge-kyc"><i class="fas fa-check-circle"></i> Đã xác thực</div>
+                    <button class="btn btn-dark fw-bold" data-bs-toggle="modal" data-bs-target="#createCourseModal"><i class="fas fa-plus me-2"></i> Khóa học mới</button>
+                <% } else if (user.kyc_status === 'pending') { %>
+                    <div class="badge-pending"><i class="fas fa-clock"></i> Đang chờ duyệt</div>
+                <% } else { %>
+                    <button class="btn btn-warning btn-sm fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#kycModal"><i class="fas fa-id-card"></i> Xác thực ngay</button>
+                <% } %>
+            </div>
+        </div>
+
+        <% if (currentTab === 'overview') { %>
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div><small class="text-muted fw-bold">DOANH THU</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalRevenue %></h2></div>
+                        <div class="icon-box bg-purple-light"><i class="fas fa-wallet"></i></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div><small class="text-muted fw-bold">HỌC VIÊN</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalStudents %></h2></div>
+                        <div class="icon-box bg-green-light"><i class="fas fa-user-graduate"></i></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div><small class="text-muted fw-bold">KHÓA HỌC</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalCourses %></h2></div>
+                        <div class="icon-box bg-purple-light"><i class="fas fa-book"></i></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="w-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted fw-bold">ĐÁNH GIÁ</small>
+                                <small class="text-muted fst-italic">(<%= stats.reviewCount %> lượt)</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-1 border-bottom pb-1">
+                                <span class="small text-muted">Môn học:</span> 
+                                <span class="fw-bold text-warning"><i class="fas fa-star"></i> <%= stats.avgCourse %></span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small text-muted">Giáo viên:</span> 
+                                <span class="fw-bold text-warning"><i class="fas fa-star"></i> <%= stats.avgTeacher %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="content-card">
+                        <div class="card-header-custom"><h5 class="fw-bold mb-0">Khóa học mới nhất</h5></div>
+                        <table class="table table-custom mb-0">
+                            <thead><tr><th>Tên khóa</th><th>Giá</th><th>Ngày tạo</th></tr></thead>
+                            <tbody>
+                                <% if(myCourses.length > 0) { %>
+                                    <% myCourses.slice(0, 3).forEach(course => { %>
+                                    <tr><td class="fw-bold"><%= course.title %></td><td><%= course.price_tokens %> Token</td><td><%= new Date(course.createdAt).toLocaleDateString('vi-VN') %></td></tr>
+                                    <% }); %>
+                                <% } else { %>
+                                    <tr><td colspan="3" class="text-center py-5 text-muted">Chưa có khóa học nào.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="content-card">
+                        <div class="card-header-custom"><h5 class="fw-bold mb-0">Học viên mới</h5></div>
+                        <% if(myStudents.length > 0) { %>
+                            <ul class="list-group list-group-flush">
+                                <% myStudents.slice(0, 5).forEach(st => { %>
+                                <li class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="student-avatar"><%= st.nickname.charAt(0) %></div>
+                                        <div>
+                                            <div class="fw-bold small"><%= st.nickname %></div>
+                                            <div class="small text-muted" style="font-size: 0.7rem;"><%= st.courseName %></div>
+                                        </div>
+                                    </div>
+                                    <% if (st.statusLabel === 'Vừa đăng ký') { %>
+                                        <span class="badge bg-warning text-dark border border-warning shadow-sm" style="font-size: 0.65rem;">Mới</span>
+                                    <% } else { %>
+                                        <span class="badge bg-success text-white border border-success" style="font-size: 0.65rem;">Đang học</span>
+                                    <% } %>
+                                </li>
+                                <% }); %>
+                            </ul>
+                        <% } else { %>
+                            <div class="p-4 text-center text-muted small">Chưa có học viên đăng ký.</div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <% if (currentTab === 'courses') { %>
+            <div class="content-card">
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead><tr><th>ID</th><th>Hình ảnh</th><th>Tên khóa học</th><th>Giá Token</th><th>Hành động</th></tr></thead>
+                        <tbody>
+                            <% if(myCourses.length > 0) { %>
+                                <% myCourses.forEach(course => { %>
+                                <tr>
+                                    <td>#<%= course.id %></td>
+                                    <td><img src="<%= course.image_url %>" width="50" class="rounded"></td>
+                                    <td class="fw-bold"><%= course.title %></td>
+                                    <td><%= course.price_tokens %></td>
+                                    <td><button class="btn btn-sm btn-outline-danger">Xóa</button> <button class="btn btn-sm btn-outline-primary">Sửa</button></td>
+                                </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr><td colspan="5" class="text-center py-5 text-muted">Danh sách trống.</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% } %>
+
+        <% if (currentTab === 'students') { %>
+            <div class="content-card">
+                <table class="table table-custom mb-0">
+                    <thead><tr><th>Học viên</th><th>Khóa học</th><th>Trạng thái ví</th><th>Hành động</th></tr></thead>
+                    <tbody>
+                        <% if(myStudents.length > 0) { %>
+                            <% myStudents.forEach(st => { %>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="student-avatar"><%= st.nickname.charAt(0) %></div>
+                                        <div><div class="fw-bold"><%= st.nickname %></div><small class="text-muted">#<%= st.custom_id %></small></div>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-light text-dark border"><%= st.courseName %></span></td>
+                                <td class="text-success fw-bold"><%= st.wallet_tokens %> Token</td>
+                                <td>
+                                    <form action="/attendance" method="POST">
+                                        <input type="hidden" name="learnerId" value="<%= st.id %>">
+                                        <button class="btn btn-sm btn-success fw-bold px-3">Điểm danh</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr><td colspan="4" class="text-center py-5 text-muted">Chưa có học viên nào đăng ký.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+
+        <% if (currentTab === 'finance') { %>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="stat-card bg-primary text-white">
+                        <div><small class="opacity-75 fw-bold">TỔNG THU NHẬP</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalRevenue %> Token</h2></div>
+                        <div class="icon-box bg-white text-primary"><i class="fas fa-university"></i></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <div><small class="text-muted fw-bold">SỐ DƯ KHẢ DỤNG</small><h2 class="fw-bold mb-0 mt-2"><%= user.wallet_tokens %> Token</h2></div>
+                        <button class="btn btn-outline-dark fw-bold">Rút tiền</button>
+                    </div>
+                </div>
+            </div>
+            <div class="content-card mt-4">
+                <div class="p-5 text-center text-muted">Lịch sử giao dịch đang được cập nhật...</div>
+            </div>
+        <% } %>
+    </div>
+
+    <div class="modal fade" id="kycModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-bottom-0 pb-0"><h5 class="modal-title fw-bold">Xác thực danh tính</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="alert alert-primary d-flex gap-2 align-items-center mb-4 border-0 bg-primary bg-opacity-10 text-primary"><i class="fas fa-info-circle"></i><small>Sau khi gửi, Admin sẽ duyệt hồ sơ trong vòng 24h.</small></div>
+                    <form action="/submit-kyc" method="POST" id="kycForm">
+                        <div class="mb-4">
+                            <label class="fw-bold small mb-2 text-muted">Loại tài khoản</label>
+                            <select name="kyc_type" id="kycType" class="form-select p-3 fw-bold" onchange="toggleKYCForm()">
+                                <option value="student_creator">🎓 Sinh viên bán khóa học</option>
+                                <option value="professional_teacher">👨‍🏫 Giảng viên chuyên nghiệp</option>
+                            </select>
+                        </div>
+                        <div id="studentFields">
+                            <div class="mb-3"><label class="fw-bold small mb-1">Mã Số Sinh Viên (MSSV)</label><input type="text" name="student_id" class="form-control" required></div>
+                            <div class="mb-3"><label class="fw-bold small mb-1">Link Ảnh Thẻ Sinh Viên</label><input type="text" name="student_card_image" class="form-control" required></div>
+                            <div class="mb-3"><label class="fw-bold small mb-1">Link Bảng Điểm</label><input type="text" name="transcript_image" class="form-control" required></div>
+                        </div>
+                        <div id="teacherFields" style="display: none;">
+                            <div class="mb-3"><label class="fw-bold small mb-1">Số hiệu Bằng cấp</label><input type="text" name="degree_number" class="form-control" disabled></div>
+                            <div class="mb-3"><label class="fw-bold small mb-1">Link Ảnh Bằng Cấp</label><input type="text" name="degree_image" class="form-control" disabled></div>
+                            <div class="mb-3"><label class="fw-bold small mb-1">Đơn vị công tác</label><input type="text" name="work_place" class="form-control" disabled></div>
+                        </div>
+                        <button class="btn btn-success w-100 py-3 fw-bold mt-2" style="background-color: #10b981; border: none;">GỬI HỒ SƠ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>function toggleKYCForm(){const e=document.getElementById("kycType").value,t=document.getElementById("studentFields"),n=document.getElementById("teacherFields"),d=t.querySelectorAll("input"),l=n.querySelectorAll("input");"student_creator"===e?(t.style.display="block",d.forEach(e=>{e.disabled=!1,e.required=!0}),n.style.display="none",l.forEach(e=>{e.disabled=!0,e.required=!1})):(t.style.display="none",d.forEach(e=>{e.disabled=!0,e.required=!1}),n.style.display="block",l.forEach(e=>{e.disabled=!1,"work_place"!==e.name&&(e.required=!0)}) )}</script>
+
+    <div class="modal fade" id="createCourseModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title fw-bold">Tạo khóa học mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <form action="/create-course" method="POST">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="fw-bold small mb-1">Tên môn học (VD: Toán Lớp 12)</label>
+                                <input type="text" name="title" class="form-control" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="fw-bold small mb-1 text-primary">Giá 1 Buổi (Token)</label>
+                                <input type="number" name="price" class="form-control fw-bold" value="1" min="1" placeholder="VD: 1">
+                                <div class="form-text small">Số token sẽ trừ mỗi lần điểm danh.</div>
+                            </div>
+                        </div>
+                        <div class="mb-3"><label class="fw-bold small mb-1">Ảnh bìa (URL)</label><input type="text" name="image_url" class="form-control"></div>
+                        <div class="mb-3"><label class="fw-bold small mb-1">Mô tả (Lịch học, nội dung...)</label><textarea name="description" class="form-control" rows="4"></textarea></div>
+                        <button class="btn btn-primary w-100 py-2 fw-bold">Mở lớp ngay</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
