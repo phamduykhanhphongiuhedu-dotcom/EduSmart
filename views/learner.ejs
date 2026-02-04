@@ -10,19 +10,37 @@
         .sidebar { width: 280px; height: 100vh; position: fixed; background: white; padding: 30px 24px; border-right: 1px solid #f1f5f9; z-index: 1000; }
         .brand-logo { font-size: 1.5rem; font-weight: 800; color: #4f46e5; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; text-decoration: none; }
         .nav-link { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: #64748b; font-weight: 600; font-size: 1rem; border-radius: 12px; text-decoration: none; transition: 0.3s; margin-bottom: 8px; }
-        .nav-link:hover { background-color: #f8fafc; color: #4f46e5; }
+        .nav-link:hover { background-color: #f8fafc; color: #4f46e5; cursor: pointer; }
         .nav-link.active { background-color: #e0e7ff; color: #4f46e5; }
         .main-content { margin-left: 280px; padding: 40px; }
-        .course-card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #f1f5f9; transition: 0.3s; cursor: pointer; }
+        
+        /* FIX LỖI CLICK: Đưa card lên lớp cao hơn */
+        .course-card { 
+            background: white; border-radius: 16px; overflow: hidden; 
+            border: 1px solid #f1f5f9; transition: 0.3s; cursor: pointer; 
+            position: relative; z-index: 10; 
+        }
         .course-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-color: #4f46e5; }
         .card-img { height: 160px; object-fit: cover; width: 100%; }
-        /* Search */
-        .search-container { position: relative; width: 100%; max-width: 400px; }
-        .search-results { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 9999; display: none; max-height: 300px; overflow-y: auto; margin-top: 5px; }
+        
+        /* Search container */
+        .search-container { position: relative; width: 100%; max-width: 400px; z-index: 50; }
+        .search-results { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 100; display: none; max-height: 300px; overflow-y: auto; margin-top: 5px; }
         .search-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: 0.2s; }
         .search-item:hover { background: #f8fafc; color: #4f46e5; padding-left: 25px; }
+        
         .history-table th { font-weight: 600; color: #64748b; background: #f8fafc; padding: 15px; }
         .history-table td { vertical-align: middle; padding: 15px; }
+
+        /* Avatar */
+        .avatar-container { position: relative; width: 45px; height: 45px; cursor: pointer; transition: transform 0.2s; z-index: 20; }
+        .avatar-container:hover { transform: scale(1.1); }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #e0e7ff; }
+        .avatar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); border-radius: 50%; display: none; align-items: center; justify-content: center; color: white; font-size: 0.8rem; }
+        .avatar-container:hover .avatar-overlay { display: flex; }
+        .class-option { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 15px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .class-option:hover { background-color: #f8fafc; border-color: #cbd5e1; }
+        .class-option.selected { border-color: #4f46e5; background-color: #e0e7ff; color: #4f46e5; }
     </style>
 </head>
 <body>
@@ -35,7 +53,7 @@
             <a href="/learner?tab=history" class="nav-link <%= currentTab === 'history' ? 'active' : '' %>"><i class="fas fa-history"></i> Lịch sử học</a>
         </div>
         <div style="margin-top: auto; padding-top: 100px;">
-            <a href="/logout" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+            <div class="nav-link text-danger" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</div>
         </div>
     </div>
 
@@ -47,23 +65,23 @@
                     <% if(currentTab === 'courses') { %> Khóa học của tôi <% } %>
                     <% if(currentTab === 'history') { %> Lịch sử học tập <% } %>
                 </h2>
-                
                 <div class="search-container">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" id="searchInput" class="form-control border-start-0 rounded-end-pill py-2" placeholder="Tìm khóa học (VD: Python)..." onkeyup="searchCourse()" autocomplete="off">
-                    </div>
+                    <div class="input-group"><span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3"><i class="fas fa-search text-muted"></i></span><input type="text" id="searchInput" class="form-control border-start-0 rounded-end-pill py-2" placeholder="Tìm khóa học..." onkeyup="searchCourse()" autocomplete="off"></div>
                     <div id="searchResults" class="search-results"></div>
                 </div>
             </div>
-
             <div class="d-flex align-items-center gap-3">
-                <div class="bg-white px-3 py-2 rounded-pill shadow-sm border fw-bold text-warning">
-                    <i class="fas fa-coins"></i> <%= user.wallet_tokens %> Token
-                </div>
+                <div class="bg-white px-3 py-2 rounded-pill shadow-sm border fw-bold text-warning"><i class="fas fa-coins"></i> <%= user.wallet_tokens %> Token</div>
                 <div class="fw-bold text-primary"><%= user.nickname %></div>
-                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
-                    <%= user.nickname.charAt(0) %>
+                <div class="avatar-container" id="avatarArea" title="Click để đổi ảnh">
+                    <% if(user.avatar && user.avatar !== '/default-avatar.png') { %>
+                        <img src="<%= user.avatar %>" class="avatar-img" id="avatarPreview">
+                    <% } else { %>
+                        <div class="avatar-img bg-primary text-white d-flex align-items-center justify-content-center fw-bold" id="avatarLetter" style="font-size: 1.2rem;"><%= user.nickname.charAt(0).toUpperCase() %></div>
+                        <img src="" class="avatar-img d-none" id="avatarPreview">
+                    <% } %>
+                    <div class="avatar-overlay"><i class="fas fa-camera"></i></div>
+                    <input type="file" id="avatarInput" hidden accept="image/*">
                 </div>
             </div>
         </header>
@@ -71,14 +89,10 @@
         <% if (currentTab === 'overview') { %>
             <div class="p-4 bg-primary text-white rounded-4 shadow-sm mb-5" style="background: linear-gradient(135deg, #4f46e5, #818cf8);">
                 <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3>Chào mừng quay trở lại! 🚀</h3>
-                        <p class="mb-0 opacity-75">Bạn đang có <%= myCourses.length %> khóa học đang kích hoạt.</p>
-                    </div>
+                    <div><h3>Chào mừng quay trở lại! 🚀</h3><p class="mb-0 opacity-75">Bạn đang có <%= myCourses.length %> khóa học đang kích hoạt.</p></div>
                     <button class="btn btn-light text-primary fw-bold rounded-pill px-4">Nạp Token</button>
                 </div>
             </div>
-
             <h5 class="fw-bold mb-3">Gợi ý khóa học mới (Đánh giá thật)</h5>
             <div class="row g-4">
                 <% suggestedCourses.slice(0, 8).forEach(course => { %>
@@ -88,14 +102,10 @@
                         <div class="p-3">
                             <h6 class="fw-bold mb-1 text-truncate"><%= course.title %></h6>
                             <div class="small text-muted mb-2">GV: <%= course.teacher_name %></div>
-                            <div class="d-flex align-items-center gap-1 mb-3 small">
-                                <i class="fas fa-star text-warning"></i>
-                                <span class="fw-bold"><%= course.rating || '0.0' %></span>
-                                <span class="text-muted">(<%= course.reviewCount || 0 %>)</span>
-                            </div>
+                            <div class="d-flex align-items-center gap-1 mb-3 small"><i class="fas fa-star text-warning"></i><span class="fw-bold"><%= course.rating || '0.0' %></span><span class="text-muted">(<%= course.reviewCount || 0 %>)</span></div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="fw-bold text-primary"><%= course.price_tokens %> Token</span>
-                                <button class="btn btn-sm btn-outline-primary rounded-pill px-3">Xem chi tiết</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3">Xem chi tiết</button>
                             </div>
                         </div>
                     </div>
@@ -112,16 +122,15 @@
                         <div class="course-card h-100 cursor-default">
                             <img src="<%= course.image_url %>" class="card-img">
                             <div class="p-3 d-flex flex-column h-100">
-                                <span class="badge bg-success bg-opacity-10 text-success mb-2 w-auto me-auto">Đang học</span>
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-success bg-opacity-10 text-success">Đang học</span>
+                                    <span class="badge bg-light text-dark border"><%= course.className %></span>
+                                </div>
                                 <h5 class="fw-bold mb-1"><%= course.title %></h5>
                                 <p class="text-muted small mb-3">GV: <%= course.teacher_name %></p>
                                 <div class="progress mb-3" style="height: 6px;"><div class="progress-bar bg-primary" style="width: 30%"></div></div>
-                                
                                 <div class="mt-auto d-grid gap-2">
-                                    <button class="btn btn-outline-warning rounded-pill fw-bold" 
-                                            onclick="openRateModal('<%= course.id %>', '<%= course.title %>')">
-                                        <i class="fas fa-star"></i> Đánh giá
-                                    </button>
+                                    <button class="btn btn-outline-warning rounded-pill fw-bold" onclick="openRateModal('<%= course.id %>', '<%= course.title %>')"><i class="fas fa-star"></i> Đánh giá</button>
                                     <button class="btn btn-primary rounded-pill">Vào lớp học</button>
                                 </div>
                             </div>
@@ -130,67 +139,14 @@
                     <% }); %>
                 </div>
             <% } else { %>
-                <div class="text-center py-5">
-                    <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                    <h5>Bạn chưa đăng ký khóa học nào</h5>
-                    <a href="/learner?tab=overview" class="btn btn-primary mt-2">Tìm khóa học ngay</a>
-                </div>
+                <div class="text-center py-5"><i class="fas fa-folder-open fa-3x text-muted mb-3"></i><h5>Bạn chưa đăng ký khóa học nào</h5><a href="/learner?tab=overview" class="btn btn-primary mt-2">Tìm khóa học ngay</a></div>
             <% } %>
         <% } %>
 
         <% if (currentTab === 'history') { %>
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-white border-bottom-0 py-3">
-                    <h5 class="fw-bold mb-0">Nhật ký hoạt động</h5>
-                </div>
-                <div class="card-body p-0">
-                    <table class="table history-table mb-0 table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">Thời gian</th>
-                                <th>Hoạt động</th>
-                                <th>Khóa học</th>
-                                <th class="text-end pe-4">Biến động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% if (historyLogs && historyLogs.length > 0) { %>
-                                <% historyLogs.forEach(log => { %>
-                                <tr>
-                                    <td class="ps-4 text-muted small">
-                                        <% 
-                                            let dateDisplay = "Vừa xong";
-                                            try {
-                                                dateDisplay = new Date(log.checkin_time).toLocaleString('vi-VN');
-                                            } catch(e) {}
-                                        %>
-                                        <i class="far fa-clock me-1"></i> <%= dateDisplay %>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">
-                                            <i class="fas fa-check-circle"></i> Điểm danh
-                                        </span>
-                                    </td>
-                                    <td class="fw-bold text-dark"><%= log.course_title %></td>
-                                    <td class="text-end pe-4 text-danger fw-bold">
-                                        - <%= log.tokens_deducted %> Token
-                                    </td>
-                                </tr>
-                                <% }); %>
-                            <% } else { %>
-                                <tr>
-                                    <td colspan="4" class="text-center py-5">
-                                        <div class="text-muted opacity-50 mb-2"><i class="fas fa-history fa-3x"></i></div>
-                                        <p class="text-muted mb-0">Chưa có lịch sử học tập nào.</p>
-                                        <small class="text-muted">(Lịch sử sẽ hiện khi Giáo viên điểm danh)</small>
-                                    </td>
-                                </tr>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-header bg-white border-bottom-0 py-3"><h5 class="fw-bold mb-0">Nhật ký hoạt động</h5></div><div class="card-body p-0"><table class="table history-table mb-0 table-hover"><thead class="table-light"><tr><th class="ps-4">Thời gian</th><th>Hoạt động</th><th>Khóa học</th><th class="text-end pe-4">Biến động</th></tr></thead><tbody><% if (historyLogs && historyLogs.length > 0) { %><% historyLogs.forEach(log => { %><tr><td class="ps-4 text-muted small"><% let dateDisplay = "Vừa xong"; try { dateDisplay = new Date(log.checkin_time).toLocaleString('vi-VN'); } catch(e) {} %><i class="far fa-clock me-1"></i> <%= dateDisplay %></td><td><span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3"><i class="fas fa-check-circle"></i> Điểm danh</span></td><td class="fw-bold text-dark"><%= log.course_title %></td><td class="text-end pe-4 text-danger fw-bold">- <%= log.tokens_deducted %> Token</td></tr><% }); %><% } else { %><tr><td colspan="4" class="text-center py-5"><div class="text-muted opacity-50 mb-2"><i class="fas fa-history fa-3x"></i></div><p class="text-muted mb-0">Chưa có lịch sử học tập nào.</p></td></tr><% } %></tbody></table></div></div>
         <% } %>
+    </div>
 
     <div class="modal fade" id="courseDetailModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -201,31 +157,23 @@
                             <img id="detailImg" src="" class="img-fluid rounded-3 shadow-sm mb-3">
                             <h2 class="fw-bold text-primary mb-0" id="detailPrice">0 Token</h2>
                             <small class="text-muted">Học phí trọn gói</small>
-                            <div id="tokenWarning" class="alert alert-danger mt-3 mb-0 py-2 small fw-bold" style="display:none;">
-                                <i class="fas fa-exclamation-triangle"></i> Bạn thiếu <span id="missingTokens">0</span> Token
-                            </div>
                         </div>
                         <div class="col-md-7 p-4">
                             <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button>
                             <h3 class="fw-bold mb-2" id="detailTitle">Title</h3>
-                            <div class="text-muted small mb-4">
-                                <i class="fas fa-chalkboard-teacher text-primary"></i> <span id="detailTeacher">GV</span> &nbsp;|&nbsp; 
-                                <i class="fas fa-calendar-alt text-primary"></i> Khai giảng: <span id="detailDate">...</span>
-                            </div>
+                            <div class="text-muted small mb-3"><i class="fas fa-chalkboard-teacher text-primary"></i> <span id="detailTeacher">GV</span></div>
                             <div class="d-flex gap-3 mb-4">
-                                <div class="bg-light rounded-3 p-2 px-3 text-center border flex-fill">
-                                    <div class="h4 fw-bold text-warning mb-0" id="rateCourse">0.0</div>
-                                    <small class="text-muted fw-bold" style="font-size: 0.7rem">ĐIỂM MÔN HỌC</small>
-                                </div>
-                                <div class="bg-light rounded-3 p-2 px-3 text-center border flex-fill">
-                                    <div class="h4 fw-bold text-warning mb-0" id="rateTeacher">0.0</div>
-                                    <small class="text-muted fw-bold" style="font-size: 0.7rem">ĐIỂM GIÁO VIÊN</small>
-                                </div>
+                                <div class="bg-light rounded-3 p-2 px-3 text-center border flex-fill"><div class="h4 fw-bold text-warning mb-0" id="rateCourse">0.0</div><small class="text-muted fw-bold" style="font-size: 0.7rem">ĐIỂM MÔN HỌC</small></div>
+                                <div class="bg-light rounded-3 p-2 px-3 text-center border flex-fill"><div class="h4 fw-bold text-warning mb-0" id="rateTeacher">0.0</div><small class="text-muted fw-bold" style="font-size: 0.7rem">ĐIỂM GIÁO VIÊN</small></div>
                             </div>
-                            <p class="text-muted mb-4" id="detailDesc">Mô tả...</p>
-                            <form action="/enroll" method="POST">
+                            <div class="mb-4">
+                                <label class="fw-bold small mb-2 text-dark">Chọn lịch học phù hợp:</label>
+                                <div id="classListContainer"></div>
+                            </div>
+                            <form action="/enroll" method="POST" onsubmit="return validateClassSelection()">
                                 <input type="hidden" name="courseId" id="inputEnrollId">
-                                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 shadow-sm" id="btnEnroll">Đăng ký học ngay</button>
+                                <input type="hidden" name="classId" id="inputClassId">
+                                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 shadow-sm" id="btnEnroll" disabled>Vui lòng chọn lớp</button>
                             </form>
                         </div>
                     </div>
@@ -234,83 +182,54 @@
         </div>
     </div>
 
-    <div class="modal fade" id="rateModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow" style="border-radius: 20px;">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold">Đánh giá chất lượng</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="/submit-review" method="POST">
-                        <input type="hidden" name="courseId" id="rateCourseId">
-                        <h5 class="text-center fw-bold text-primary mb-4" id="rateCourseTitle">Tên khóa học</h5>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label class="d-block fw-bold small mb-2 text-center">Chất lượng môn học</label>
-                                <select name="course_rating" class="form-select text-center fw-bold text-warning">
-                                    <option value="5">5 ⭐ Xuất sắc</option>
-                                    <option value="4">4 ⭐ Tốt</option>
-                                    <option value="3">3 ⭐ Khá</option>
-                                    <option value="2">2 ⭐ TB</option>
-                                    <option value="1">1 ⭐ Kém</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="d-block fw-bold small mb-2 text-center">Giáo viên dạy</label>
-                                <select name="teacher_rating" class="form-select text-center fw-bold text-warning">
-                                    <option value="5">5 ⭐ Nhiệt tình</option>
-                                    <option value="4">4 ⭐ Dễ hiểu</option>
-                                    <option value="3">3 ⭐ Bình thường</option>
-                                    <option value="2">2 ⭐ Khó hiểu</option>
-                                    <option value="1">1 ⭐ Tệ</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="fw-bold small mb-1">Nhận xét chi tiết</label>
-                            <textarea name="comment" class="form-control bg-light" rows="3" placeholder="Chia sẻ cảm nhận của bạn..." required></textarea>
-                        </div>
-                        <button class="btn btn-warning w-100 fw-bold py-2 rounded-3">Gửi đánh giá</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="modal fade" id="rateModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow" style="border-radius: 20px;"><div class="modal-header border-0"><h5 class="modal-title fw-bold">Đánh giá chất lượng</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form action="/submit-review" method="POST"><input type="hidden" name="courseId" id="rateCourseId"><h5 class="text-center fw-bold text-primary mb-4" id="rateCourseTitle">Tên khóa học</h5><div class="row mb-3"><div class="col-6"><label class="d-block fw-bold small mb-2 text-center">Chất lượng môn học</label><select name="course_rating" class="form-select text-center fw-bold text-warning"><option value="5">5 ⭐ Xuất sắc</option><option value="4">4 ⭐ Tốt</option><option value="3">3 ⭐ Khá</option><option value="2">2 ⭐ TB</option><option value="1">1 ⭐ Kém</option></select></div><div class="col-6"><label class="d-block fw-bold small mb-2 text-center">Giáo viên dạy</label><select name="teacher_rating" class="form-select text-center fw-bold text-warning"><option value="5">5 ⭐ Nhiệt tình</option><option value="4">4 ⭐ Dễ hiểu</option><option value="3">3 ⭐ Bình thường</option><option value="2">2 ⭐ Khó hiểu</option><option value="1">1 ⭐ Tệ</option></select></div></div><div class="mb-3"><label class="fw-bold small mb-1">Nhận xét chi tiết</label><textarea name="comment" class="form-control bg-light" rows="3" placeholder="Chia sẻ cảm nhận..." required></textarea></div><button class="btn btn-warning w-100 fw-bold py-2 rounded-3">Gửi đánh giá</button></form></div></div></div></div>
+
+    <div class="modal fade" id="logoutModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content border-0 shadow rounded-4 text-center p-3"><div class="mb-3 mt-2 text-warning"><i class="fas fa-sign-out-alt fa-3x"></i></div><h5 class="fw-bold mb-2">Đăng xuất?</h5><div class="d-flex gap-2 justify-content-center mt-4"><button type="button" class="btn btn-light fw-bold flex-fill rounded-pill" data-bs-dismiss="modal">Không</button><a href="/logout" class="btn btn-danger fw-bold flex-fill rounded-pill">Có</a></div></div></div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const userTokens = <%= user.wallet_tokens %>;
 
-        // 1. TÌM KIẾM
+        // UPLOAD AVATAR
+        const avatarArea = document.getElementById('avatarArea');
+        const avatarInput = document.getElementById('avatarInput');
+        const avatarPreview = document.getElementById('avatarPreview');
+        const avatarLetter = document.getElementById('avatarLetter');
+        avatarArea.addEventListener('click', () => avatarInput.click());
+        avatarArea.addEventListener('dragover', (e) => { e.preventDefault(); avatarArea.classList.add('avatar-drag-active'); });
+        avatarArea.addEventListener('dragleave', () => avatarArea.classList.remove('avatar-drag-active'));
+        avatarArea.addEventListener('drop', (e) => {
+            e.preventDefault(); avatarArea.classList.remove('avatar-drag-active');
+            if(e.dataTransfer.files.length > 0) handleFileUpload(e.dataTransfer.files[0]);
+        });
+        avatarInput.addEventListener('change', () => { if(avatarInput.files.length > 0) handleFileUpload(avatarInput.files[0]); });
+        async function handleFileUpload(file) {
+            const formData = new FormData(); formData.append('avatar', file);
+            try { const res = await fetch('/upload-avatar', { method: 'POST', body: formData }); const data = await res.json();
+                if(data.success) { avatarPreview.src = data.newAvatar; avatarPreview.classList.remove('d-none'); if(avatarLetter) avatarLetter.classList.add('d-none'); } 
+                else { alert('Lỗi: ' + data.message); }
+            } catch (err) { alert('Lỗi upload ảnh!'); }
+        }
+
+        // TÌM KIẾM
         async function searchCourse() {
             const query = document.getElementById('searchInput').value;
             const resultBox = document.getElementById('searchResults');
-            
             if (query.length < 2) { resultBox.style.display = 'none'; return; }
-
-            const res = await fetch(`/api/search?q=${query}`);
-            const courses = await res.json();
-
+            const res = await fetch(`/api/search?q=${query}`); const courses = await res.json();
             resultBox.innerHTML = '';
             if (courses.length > 0) {
                 resultBox.style.display = 'block';
                 courses.forEach(c => {
-                    const div = document.createElement('div');
-                    div.className = 'search-item';
-                    div.innerHTML = `<i class="fas fa-book-open me-2 text-muted"></i> <b>${c.title}</b> <span class="float-end text-primary fw-bold small">${c.price_tokens} Token</span>`;
+                    const div = document.createElement('div'); div.className = 'search-item';
+                    div.innerHTML = `<i class="fas fa-book-open me-2 text-muted"></i> <b>${c.title}</b>`;
                     div.onclick = () => showCourseDetail(c.id);
                     resultBox.appendChild(div);
                 });
-            } else {
-                resultBox.style.display = 'none';
-            }
+            } else { resultBox.style.display = 'none'; }
         }
 
-        // 2. HIỆN CHI TIẾT KHÓA HỌC
-        // views/learner.ejs - Tìm hàm showCourseDetail trong thẻ <script> cuối file và thay thế:
-
-        // 2. HIỆN CHI TIẾT KHÓA HỌC
+        // HIỆN CHI TIẾT
         async function showCourseDetail(id) {
             document.getElementById('searchResults').style.display = 'none';
             const res = await fetch(`/api/course/${id}`);
@@ -318,30 +237,51 @@
             
             document.getElementById('detailTitle').innerText = data.title;
             document.getElementById('detailTeacher').innerText = data.teacher_name;
-            document.getElementById('detailDate').innerText = new Date(data.start_date).toLocaleDateString('vi-VN');
-            document.getElementById('detailDesc').innerText = data.description;
             document.getElementById('detailImg').src = data.image_url;
-            
-            // [CẬP NHẬT] Hiển thị rõ ràng: Giá / 1 Buổi
             document.getElementById('detailPrice').innerHTML = `${data.price_tokens} Token <span class="fs-6 text-muted fw-normal">/ 1 Buổi</span>`;
+            document.getElementById('rateCourse').innerText = data.stats.avgCourse;
+            document.getElementById('rateTeacher').innerText = data.stats.avgTeacher;
             
-            // ... (các phần rateCourse, rateTeacher giữ nguyên) ...
+            const classContainer = document.getElementById('classListContainer');
+            classContainer.innerHTML = '';
+            const btnEnroll = document.getElementById('btnEnroll');
+            btnEnroll.disabled = true;
+            btnEnroll.innerText = "Vui lòng chọn lớp";
 
-            // [LOGIC MỚI] Không cần check thiếu tiền khi đăng ký nữa (vì đăng ký free)
-            // Luôn cho phép đăng ký
-            const btn = document.getElementById('btnEnroll');
-            const warning = document.getElementById('tokenWarning');
-            
-            warning.style.display = 'none';
-            btn.innerText = "Đăng ký tham gia lớp";
-            btn.className = "btn btn-primary w-100 py-3 fw-bold rounded-3 shadow-sm";
-            btn.disabled = false;
+            if (data.classes && data.classes.length > 0) {
+                data.classes.forEach(cls => {
+                    const available = cls.capacity - cls.enrolled;
+                    const isFull = available <= 0;
+                    const div = document.createElement('div');
+                    div.className = `class-option ${isFull ? 'opacity-50' : ''}`;
+                    div.innerHTML = `<div><div class="fw-bold text-dark">${cls.name}</div><div class="small text-muted"><i class="far fa-clock me-1"></i> ${cls.schedule}</div></div><div class="text-end"><div class="fw-bold ${isFull ? 'text-danger' : 'text-success'} small">${isFull ? 'Đã đầy' : `Còn ${available} chỗ`}</div></div>`;
+                    
+                    if (!isFull) {
+                        div.onclick = () => {
+                            document.querySelectorAll('.class-option').forEach(el => el.classList.remove('selected'));
+                            div.classList.add('selected');
+                            document.getElementById('inputClassId').value = cls.id;
+                            btnEnroll.disabled = false;
+                            btnEnroll.innerText = "Đăng ký tham gia lớp";
+                        };
+                    }
+                    classContainer.appendChild(div);
+                });
+            } else {
+                classContainer.innerHTML = '<div class="text-muted small fst-italic">Hiện chưa có lớp nào mở đăng ký.</div>';
+            }
 
             document.getElementById('inputEnrollId').value = data.id;
             new bootstrap.Modal(document.getElementById('courseDetailModal')).show();
         }
 
-        // 3. MỞ MODAL ĐÁNH GIÁ (Hàm này giờ chỉ có 1 bản duy nhất ở cuối file)
+        function validateClassSelection() {
+            const classId = document.getElementById('inputClassId').value;
+            if (!classId) { alert("Bạn phải chọn một lớp học để đăng ký!"); return false; }
+            return true;
+        }
+
+        function confirmLogout() { new bootstrap.Modal(document.getElementById('logoutModal')).show(); }
         function openRateModal(id, title) {
             document.getElementById('rateCourseId').value = id;
             document.getElementById('rateCourseTitle').innerText = title;
