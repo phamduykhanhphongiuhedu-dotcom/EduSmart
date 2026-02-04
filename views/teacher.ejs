@@ -9,55 +9,41 @@
     <style>
         :root { --sidebar-width: 260px; --primary: #4f46e5; --dark: #0f172a; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
-        
-        /* SIDEBAR */
-        .sidebar {
-            width: var(--sidebar-width); height: 100vh; position: fixed; 
-            background: var(--dark); color: #94a3b8; padding: 24px; z-index: 100;
-        }
+        .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; background: var(--dark); color: #94a3b8; padding: 24px; z-index: 100; }
         .brand { color: white; font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; text-decoration: none; }
-        
-        .nav-item {
-            padding: 12px 16px; border-radius: 10px; color: #94a3b8; font-weight: 500;
-            text-decoration: none; display: flex; align-items: center; gap: 12px;
-            margin-bottom: 5px; transition: 0.2s;
-        }
+        .nav-item { padding: 12px 16px; border-radius: 10px; color: #94a3b8; font-weight: 500; text-decoration: none; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; transition: 0.2s; cursor: pointer; }
         .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
         .nav-item.active { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-
         .main-content { margin-left: var(--sidebar-width); padding: 32px; }
-
-        /* HEADER */
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
         .badge-kyc { background: #dcfce7; color: #15803d; border: 1px solid #86efac; padding: 6px 14px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; }
         .badge-pending { background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; padding: 6px 14px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; }
-
-        /* Cards & Tables */
         .stat-card { background: white; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02); height: 100%; }
         .content-card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; height: 100%; margin-bottom: 20px; }
         .card-header-custom { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
         .table-custom th { background: #f8fafc; font-size: 0.8rem; text-transform: uppercase; color: #64748b; padding: 16px 24px; font-weight: 700; }
         .table-custom td { padding: 16px 24px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
-
-        /* Utils */
         .icon-box { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
         .bg-purple-light { background: #e0e7ff; color: #4f46e5; }
         .bg-green-light { background: #dcfce7; color: #16a34a; }
         .bg-orange-light { background: #ffedd5; color: #ea580c; }
-        .student-avatar { width: 36px; height: 36px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #64748b; margin-right: 12px; }
+        .student-avatar { width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #64748b; margin-right: 15px; font-size: 1.1rem; }
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: 0.3s; background: #f8fafc; position: relative; }
+        .drop-zone:hover, .drop-zone.drag-active { border-color: #4f46e5; background: #e0e7ff; }
+        .drop-zone p { margin: 0; color: #64748b; font-size: 0.9rem; pointer-events: none; }
+        .preview-img { max-height: 100px; margin-top: 10px; border-radius: 8px; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; }
+        .drop-zone.has-image p { opacity: 0; } .drop-zone.has-image img { display: block; }
     </style>
 </head>
 <body>
-
     <div class="sidebar">
         <a href="/" class="brand"><i class="fas fa-layer-group"></i> EduTeacher</a>
         <a href="/teacher?tab=overview" class="nav-item <%= currentTab === 'overview' ? 'active' : '' %>"><i class="fas fa-th-large"></i> Tổng quan</a>
+        <a href="/teacher?tab=classes" class="nav-item <%= currentTab === 'classes' ? 'active' : '' %>"><i class="fas fa-chalkboard-teacher"></i> Lớp học</a>
         <a href="/teacher?tab=courses" class="nav-item <%= currentTab === 'courses' ? 'active' : '' %>"><i class="fas fa-book"></i> Quản lý khóa học</a>
-        <a href="/teacher?tab=students" class="nav-item <%= currentTab === 'students' ? 'active' : '' %>"><i class="fas fa-users"></i> Học viên</a>
+        <a href="/teacher?tab=students" class="nav-item <%= currentTab === 'students' ? 'active' : '' %>"><i class="fas fa-users"></i> Danh sách học viên</a>
         <a href="/teacher?tab=finance" class="nav-item <%= currentTab === 'finance' ? 'active' : '' %>"><i class="fas fa-wallet"></i> Tài chính</a>
-        <div style="margin-top: auto; padding-top: 100px;">
-            <a href="/logout" class="nav-item text-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
-        </div>
+        <div style="margin-top: auto; padding-top: 100px;"><div class="nav-item text-danger" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</div></div>
     </div>
 
     <div class="main-content">
@@ -65,6 +51,7 @@
             <div>
                 <h2 class="fw-bold mb-1">
                     <% if(currentTab==='overview'){ %>Bảng điều khiển<% } %>
+                    <% if(currentTab==='classes'){ %>Lịch dạy & Lớp học<% } %>
                     <% if(currentTab==='courses'){ %>Quản lý khóa học<% } %>
                     <% if(currentTab==='students'){ %>Danh sách học viên<% } %>
                     <% if(currentTab==='finance'){ %>Tài chính & Doanh thu<% } %>
@@ -85,44 +72,11 @@
 
         <% if (currentTab === 'overview') { %>
             <div class="row g-4 mb-4">
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div><small class="text-muted fw-bold">DOANH THU</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalRevenue %></h2></div>
-                        <div class="icon-box bg-purple-light"><i class="fas fa-wallet"></i></div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div><small class="text-muted fw-bold">HỌC VIÊN</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalStudents %></h2></div>
-                        <div class="icon-box bg-green-light"><i class="fas fa-user-graduate"></i></div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div><small class="text-muted fw-bold">KHÓA HỌC</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalCourses %></h2></div>
-                        <div class="icon-box bg-purple-light"><i class="fas fa-book"></i></div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="w-100">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <small class="text-muted fw-bold">ĐÁNH GIÁ</small>
-                                <small class="text-muted fst-italic">(<%= stats.reviewCount %> lượt)</small>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-1 border-bottom pb-1">
-                                <span class="small text-muted">Môn học:</span> 
-                                <span class="fw-bold text-warning"><i class="fas fa-star"></i> <%= stats.avgCourse %></span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="small text-muted">Giáo viên:</span> 
-                                <span class="fw-bold text-warning"><i class="fas fa-star"></i> <%= stats.avgTeacher %></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="col-md-3"><div class="stat-card"><div><small class="text-muted fw-bold">DOANH THU</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalRevenue %></h2></div><div class="icon-box bg-purple-light"><i class="fas fa-wallet"></i></div></div></div>
+                <div class="col-md-3"><div class="stat-card"><div><small class="text-muted fw-bold">HỌC VIÊN</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalStudents %></h2></div><div class="icon-box bg-green-light"><i class="fas fa-user-graduate"></i></div></div></div>
+                <div class="col-md-3"><div class="stat-card"><div><small class="text-muted fw-bold">KHÓA HỌC</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalCourses %></h2></div><div class="icon-box bg-purple-light"><i class="fas fa-book"></i></div></div></div>
+                <div class="col-md-3"><div class="stat-card"><div class="w-100"><div class="d-flex justify-content-between align-items-center mb-2"><small class="text-muted fw-bold">ĐÁNH GIÁ</small><small class="text-muted fst-italic">(<%= stats.reviewCount %> lượt)</small></div><div class="d-flex justify-content-between align-items-center mb-1 border-bottom pb-1"><span class="small text-muted">Môn:</span> <span class="fw-bold text-warning"><i class="fas fa-star"></i> <%= stats.avgCourse %></span></div><div class="d-flex justify-content-between align-items-center"><span class="small text-muted">GV:</span> <span class="fw-bold text-warning"><i class="fas fa-star"></i> <%= stats.avgTeacher %></span></div></div></div></div>
             </div>
-
             <div class="row g-4">
                 <div class="col-lg-8">
                     <div class="content-card">
@@ -150,10 +104,7 @@
                                 <li class="list-group-item p-3 d-flex justify-content-between align-items-center">
                                     <div class="d-flex align-items-center">
                                         <div class="student-avatar"><%= st.nickname.charAt(0) %></div>
-                                        <div>
-                                            <div class="fw-bold small"><%= st.nickname %></div>
-                                            <div class="small text-muted" style="font-size: 0.7rem;"><%= st.courseName %></div>
-                                        </div>
+                                        <div><div class="fw-bold small"><%= st.nickname %></div><div class="small text-muted" style="font-size: 0.7rem;"><%= st.courseName %></div></div>
                                     </div>
                                     <% if (st.statusLabel === 'Vừa đăng ký') { %>
                                         <span class="badge bg-warning text-dark border border-warning shadow-sm" style="font-size: 0.65rem;">Mới</span>
@@ -164,31 +115,92 @@
                                 <% }); %>
                             </ul>
                         <% } else { %>
-                            <div class="p-4 text-center text-muted small">Chưa có học viên đăng ký.</div>
+                            <div class="p-4 text-center text-muted small">Chưa có học viên.</div>
                         <% } %>
                     </div>
                 </div>
             </div>
         <% } %>
 
+        <% if (currentTab === 'classes') { %>
+            <div class="row">
+                <div class="col-12">
+                    <% if(myCourses.length > 0) { %>
+                        <div class="accordion shadow-sm" id="accordionClasses">
+                            <% myCourses.forEach((course, index) => { %>
+                                <div class="accordion-item border-0 mb-3 rounded overflow-hidden shadow-sm">
+                                    <h2 class="accordion-header"><button class="accordion-button <%= index !== 0 ? 'collapsed' : '' %> fw-bold bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<%= index %>"><i class="fas fa-book-reader me-2 text-primary"></i> <%= course.title %></button></h2>
+                                    <div id="collapse<%= index %>" class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>" data-bs-parent="#accordionClasses">
+                                        <div class="accordion-body bg-light">
+                                            <div class="row g-3">
+                                                <% const classesInCourse = allClasses.filter(c => c.course_id === course.id); %>
+                                                <% if(classesInCourse.length > 0) { %>
+                                                    <% classesInCourse.forEach(cl => { %>
+                                                        <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="d-flex justify-content-between mb-2"><h5 class="card-title fw-bold text-primary mb-0"><%= cl.name %></h5><span class="badge bg-success bg-opacity-10 text-success"><i class="fas fa-user"></i> <%= cl.enrolled %>/<%= cl.capacity %></span></div><p class="card-text text-muted small mb-3"><i class="far fa-clock text-warning"></i> Lịch: <b><%= cl.schedule %></b></p><div class="d-grid"><button class="btn btn-primary btn-sm rounded-pill fw-bold"><i class="fas fa-video me-1"></i> Vào lớp dạy</button></div></div></div></div>
+                                                    <% }); %>
+                                                <% } else { %>
+                                                    <div class="col-12 text-muted fst-italic">Chưa mở lớp nào cho khóa này.</div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %><div class="text-center py-5 text-muted">Bạn chưa tạo khóa học nào.</div><% } %>
+                </div>
+            </div>
+        <% } %>
+
         <% if (currentTab === 'courses') { %>
+            <div class="content-card"><div class="table-responsive"><table class="table table-custom mb-0"><thead><tr><th>ID</th><th>Hình ảnh</th><th>Tên khóa học</th><th>Giá Token</th><th>Hành động</th></tr></thead><tbody><% if(myCourses.length > 0) { %><% myCourses.forEach(course => { %><tr><td>#<%= course.id %></td><td><img src="<%= course.image_url %>" width="50" class="rounded"></td><td class="fw-bold"><%= course.title %></td><td><%= course.price_tokens %></td><td><button class="btn btn-sm btn-outline-danger">Xóa</button> <button class="btn btn-sm btn-outline-primary">Sửa</button></td></tr><% }); %><% } else { %><tr><td colspan="5" class="text-center py-5 text-muted">Danh sách trống.</td></tr><% } %></tbody></table></div></div>
+        <% } %>
+
+        <% if (currentTab === 'students') { %>
             <div class="content-card">
+                <div class="card-header-custom bg-white">
+                    <h5 class="fw-bold mb-0">Danh sách học viên</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="small fw-bold text-muted text-nowrap"><i class="fas fa-filter"></i> Lọc theo lớp:</label>
+                        <select class="form-select form-select-sm fw-bold border-primary text-primary" style="width: 200px;" onchange="window.location.href='/teacher?tab=students&classId='+this.value">
+                            <option value="all" <%= selectedClassId === 'all' ? 'selected' : '' %>>Tất cả các lớp</option>
+                            <% if (allClasses && allClasses.length > 0) { %>
+                                <% allClasses.forEach(c => { %>
+                                    <option value="<%= c.id %>" <%= parseInt(selectedClassId) === c.id ? 'selected' : '' %>><%= c.name %></option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="table-responsive">
-                    <table class="table table-custom mb-0">
-                        <thead><tr><th>ID</th><th>Hình ảnh</th><th>Tên khóa học</th><th>Giá Token</th><th>Hành động</th></tr></thead>
+                    <table class="table table-custom mb-0 align-middle">
+                        <thead><tr><th class="ps-4">HỌC VIÊN</th><th>LỚP HỌC</th><th>TRẠNG THÁI VÍ</th><th class="text-end pe-4">HÀNH ĐỘNG</th></tr></thead>
                         <tbody>
-                            <% if(myCourses.length > 0) { %>
-                                <% myCourses.forEach(course => { %>
+                            <% if(myStudents.length > 0) { %>
+                                <% myStudents.forEach(st => { %>
                                 <tr>
-                                    <td>#<%= course.id %></td>
-                                    <td><img src="<%= course.image_url %>" width="50" class="rounded"></td>
-                                    <td class="fw-bold"><%= course.title %></td>
-                                    <td><%= course.price_tokens %></td>
-                                    <td><button class="btn btn-sm btn-outline-danger">Xóa</button> <button class="btn btn-sm btn-outline-primary">Sửa</button></td>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="student-avatar bg-light text-primary border"><%= st.nickname.charAt(0).toUpperCase() %></div>
+                                            <div><div class="fw-bold text-dark"><%= st.nickname %></div><div class="small text-muted">ID: #<%= st.custom_id %></div></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill"><i class="fas fa-book me-1 text-muted"></i> <%= st.courseName %></span>
+                                        <div class="small text-muted mt-1 ms-1"><i class="fas fa-layer-group"></i> <%= st.className %></div>
+                                    </td>
+                                    <td><div class="fw-bold text-success"><%= st.wallet_tokens %> Token</div></td>
+                                    <td class="text-end pe-4">
+                                        <form action="/attendance" method="POST">
+                                            <input type="hidden" name="learnerId" value="<%= st.id %>">
+                                            <button class="btn btn-success fw-bold px-4 rounded-pill shadow-sm">Điểm danh</button>
+                                        </form>
+                                    </td>
                                 </tr>
                                 <% }); %>
                             <% } else { %>
-                                <tr><td colspan="5" class="text-center py-5 text-muted">Danh sách trống.</td></tr>
+                                <tr><td colspan="4" class="text-center py-5 text-muted"><i class="fas fa-user-slash fa-2x mb-3 opacity-50"></i><p>Không tìm thấy học viên nào.</p></td></tr>
                             <% } %>
                         </tbody>
                     </table>
@@ -196,116 +208,24 @@
             </div>
         <% } %>
 
-        <% if (currentTab === 'students') { %>
-            <div class="content-card">
-                <table class="table table-custom mb-0">
-                    <thead><tr><th>Học viên</th><th>Khóa học</th><th>Trạng thái ví</th><th>Hành động</th></tr></thead>
-                    <tbody>
-                        <% if(myStudents.length > 0) { %>
-                            <% myStudents.forEach(st => { %>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="student-avatar"><%= st.nickname.charAt(0) %></div>
-                                        <div><div class="fw-bold"><%= st.nickname %></div><small class="text-muted">#<%= st.custom_id %></small></div>
-                                    </div>
-                                </td>
-                                <td><span class="badge bg-light text-dark border"><%= st.courseName %></span></td>
-                                <td class="text-success fw-bold"><%= st.wallet_tokens %> Token</td>
-                                <td>
-                                    <form action="/attendance" method="POST">
-                                        <input type="hidden" name="learnerId" value="<%= st.id %>">
-                                        <button class="btn btn-sm btn-success fw-bold px-3">Điểm danh</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <% }); %>
-                        <% } else { %>
-                            <tr><td colspan="4" class="text-center py-5 text-muted">Chưa có học viên nào đăng ký.</td></tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
-        <% } %>
-
         <% if (currentTab === 'finance') { %>
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="stat-card bg-primary text-white">
-                        <div><small class="opacity-75 fw-bold">TỔNG THU NHẬP</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalRevenue %> Token</h2></div>
-                        <div class="icon-box bg-white text-primary"><i class="fas fa-university"></i></div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="stat-card">
-                        <div><small class="text-muted fw-bold">SỐ DƯ KHẢ DỤNG</small><h2 class="fw-bold mb-0 mt-2"><%= user.wallet_tokens %> Token</h2></div>
-                        <button class="btn btn-outline-dark fw-bold">Rút tiền</button>
-                    </div>
-                </div>
-            </div>
-            <div class="content-card mt-4">
-                <div class="p-5 text-center text-muted">Lịch sử giao dịch đang được cập nhật...</div>
-            </div>
+            <div class="row g-4"><div class="col-md-6"><div class="stat-card bg-primary text-white"><div><small class="opacity-75 fw-bold">TỔNG THU NHẬP</small><h2 class="fw-bold mb-0 mt-2"><%= stats.totalRevenue %> Token</h2></div><div class="icon-box bg-white text-primary"><i class="fas fa-university"></i></div></div></div><div class="col-md-6"><div class="stat-card"><div><small class="text-muted fw-bold">SỐ DƯ KHẢ DỤNG</small><h2 class="fw-bold mb-0 mt-2"><%= user.wallet_tokens %> Token</h2></div><button class="btn btn-outline-dark fw-bold">Rút tiền</button></div></div></div><div class="content-card mt-4"><div class="p-5 text-center text-muted">Lịch sử giao dịch đang được cập nhật...</div></div>
         <% } %>
     </div>
 
-    <div class="modal fade" id="kycModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header border-bottom-0 pb-0"><h5 class="modal-title fw-bold">Xác thực danh tính</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
-                    <div class="alert alert-primary d-flex gap-2 align-items-center mb-4 border-0 bg-primary bg-opacity-10 text-primary"><i class="fas fa-info-circle"></i><small>Sau khi gửi, Admin sẽ duyệt hồ sơ trong vòng 24h.</small></div>
-                    <form action="/submit-kyc" method="POST" id="kycForm">
-                        <div class="mb-4">
-                            <label class="fw-bold small mb-2 text-muted">Loại tài khoản</label>
-                            <select name="kyc_type" id="kycType" class="form-select p-3 fw-bold" onchange="toggleKYCForm()">
-                                <option value="student_creator">🎓 Sinh viên bán khóa học</option>
-                                <option value="professional_teacher">👨‍🏫 Giảng viên chuyên nghiệp</option>
-                            </select>
-                        </div>
-                        <div id="studentFields">
-                            <div class="mb-3"><label class="fw-bold small mb-1">Mã Số Sinh Viên (MSSV)</label><input type="text" name="student_id" class="form-control" required></div>
-                            <div class="mb-3"><label class="fw-bold small mb-1">Link Ảnh Thẻ Sinh Viên</label><input type="text" name="student_card_image" class="form-control" required></div>
-                            <div class="mb-3"><label class="fw-bold small mb-1">Link Bảng Điểm</label><input type="text" name="transcript_image" class="form-control" required></div>
-                        </div>
-                        <div id="teacherFields" style="display: none;">
-                            <div class="mb-3"><label class="fw-bold small mb-1">Số hiệu Bằng cấp</label><input type="text" name="degree_number" class="form-control" disabled></div>
-                            <div class="mb-3"><label class="fw-bold small mb-1">Link Ảnh Bằng Cấp</label><input type="text" name="degree_image" class="form-control" disabled></div>
-                            <div class="mb-3"><label class="fw-bold small mb-1">Đơn vị công tác</label><input type="text" name="work_place" class="form-control" disabled></div>
-                        </div>
-                        <button class="btn btn-success w-100 py-3 fw-bold mt-2" style="background-color: #10b981; border: none;">GỬI HỒ SƠ</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>function toggleKYCForm(){const e=document.getElementById("kycType").value,t=document.getElementById("studentFields"),n=document.getElementById("teacherFields"),d=t.querySelectorAll("input"),l=n.querySelectorAll("input");"student_creator"===e?(t.style.display="block",d.forEach(e=>{e.disabled=!1,e.required=!0}),n.style.display="none",l.forEach(e=>{e.disabled=!0,e.required=!1})):(t.style.display="none",d.forEach(e=>{e.disabled=!0,e.required=!1}),n.style.display="block",l.forEach(e=>{e.disabled=!1,"work_place"!==e.name&&(e.required=!0)}) )}</script>
+    <div class="modal fade" id="kycModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header border-bottom-0 pb-0"><h5 class="modal-title fw-bold">Xác thực danh tính</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="alert alert-primary d-flex gap-2 align-items-center mb-4 border-0 bg-primary bg-opacity-10 text-primary"><i class="fas fa-info-circle"></i><small>Duyệt hồ sơ trong vòng 24h.</small></div><form action="/submit-kyc" method="POST" enctype="multipart/form-data" id="kycForm"><div class="mb-4"><label class="fw-bold small mb-2 text-muted">Loại tài khoản</label><select name="kyc_type" id="kycType" class="form-select p-3 fw-bold" onchange="toggleKYCForm()"><option value="student_creator">🎓 Sinh viên bán khóa học</option><option value="professional_teacher">👨‍🏫 Giảng viên chuyên nghiệp</option></select></div><div id="studentFields"><div class="mb-3"><label class="fw-bold small mb-1">Mã Số Sinh Viên</label><input type="text" name="student_id" class="form-control" required></div><div class="row"><div class="col-md-6 mb-3"><label class="fw-bold small mb-1">Ảnh Thẻ Sinh Viên</label><div class="drop-zone" onclick="document.getElementById('fileStudentCard').click()"><p><i class="fas fa-cloud-upload-alt fa-2x mb-2"></i><br>Kéo thả hoặc Click</p><img class="preview-img" id="prevStudentCard"><input type="file" name="student_card_image" id="fileStudentCard" hidden onchange="previewFile(this, 'prevStudentCard')"></div></div><div class="col-md-6 mb-3"><label class="fw-bold small mb-1">Bảng Điểm</label><div class="drop-zone" onclick="document.getElementById('fileTranscript').click()"><p><i class="fas fa-cloud-upload-alt fa-2x mb-2"></i><br>Kéo thả hoặc Click</p><img class="preview-img" id="prevTranscript"><input type="file" name="transcript_image" id="fileTranscript" hidden onchange="previewFile(this, 'prevTranscript')"></div></div></div></div><div id="teacherFields" style="display: none;"><div class="mb-3"><label class="fw-bold small mb-1">Đơn vị công tác</label><input type="text" name="work_place" class="form-control" disabled></div><div class="mb-3"><label class="fw-bold small mb-1">Số hiệu Bằng cấp</label><input type="text" name="degree_number" class="form-control" disabled></div><div class="mb-3"><label class="fw-bold small mb-1">Ảnh Bằng Cấp / Chứng Chỉ</label><div class="drop-zone" onclick="document.getElementById('fileDegree').click()"><p><i class="fas fa-cloud-upload-alt fa-2x mb-2"></i><br>Kéo thả hoặc Click</p><img class="preview-img" id="prevDegree"><input type="file" name="degree_image" id="fileDegree" hidden onchange="previewFile(this, 'prevDegree')"></div></div></div><button class="btn btn-success w-100 py-3 fw-bold mt-2">GỬI HỒ SƠ</button></form></div></div></div></div>
 
-    <div class="modal fade" id="createCourseModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title fw-bold">Tạo khóa học mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
-                    <form action="/create-course" method="POST">
-                        <div class="row">
-                            <div class="col-md-8 mb-3">
-                                <label class="fw-bold small mb-1">Tên môn học (VD: Toán Lớp 12)</label>
-                                <input type="text" name="title" class="form-control" required>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="fw-bold small mb-1 text-primary">Giá 1 Buổi (Token)</label>
-                                <input type="number" name="price" class="form-control fw-bold" value="1" min="1" placeholder="VD: 1">
-                                <div class="form-text small">Số token sẽ trừ mỗi lần điểm danh.</div>
-                            </div>
-                        </div>
-                        <div class="mb-3"><label class="fw-bold small mb-1">Ảnh bìa (URL)</label><input type="text" name="image_url" class="form-control"></div>
-                        <div class="mb-3"><label class="fw-bold small mb-1">Mô tả (Lịch học, nội dung...)</label><textarea name="description" class="form-control" rows="4"></textarea></div>
-                        <button class="btn btn-primary w-100 py-2 fw-bold">Mở lớp ngay</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="modal fade" id="createCourseModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold">Thiết lập khóa học mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form action="/create-course" method="POST" onsubmit="prepareClassesData(event)"><div class="row"><div class="col-md-4 border-end"><h6 class="text-primary fw-bold mb-3">1. Thông tin chung</h6><div class="mb-3"><label class="fw-bold small mb-1">Tên môn học</label><input type="text" name="title" class="form-control" placeholder="VD: Toán Cao Cấp" required></div><div class="mb-3"><label class="fw-bold small mb-1 text-primary">Giá 1 Buổi (Token)</label><input type="number" name="price" class="form-control fw-bold" value="1" min="1"></div><div class="mb-3"><label class="fw-bold small mb-1">Ảnh bìa (URL)</label><input type="text" name="image_url" class="form-control" placeholder="https://..."></div><div class="mb-3"><label class="fw-bold small mb-1">Mô tả</label><textarea name="description" class="form-control" rows="3"></textarea></div></div><div class="col-md-8 ps-4"><div class="d-flex justify-content-between align-items-center mb-3"><h6 class="text-primary fw-bold mb-0">2. Mở các lớp học</h6><button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="addClassRow()"><i class="fas fa-plus"></i> Thêm lớp</button></div><div class="table-responsive bg-light rounded-3 p-2"><table class="table table-borderless mb-0"><thead><tr class="text-muted small text-uppercase"><th>Tên lớp</th><th>Lịch học</th><th style="width: 100px;">Sĩ số</th><th style="width: 50px;"></th></tr></thead><tbody id="classesContainer"><tr><td><input type="text" class="form-control form-control-sm class-name" placeholder="VD: Lớp A" required></td><td><input type="text" class="form-control form-control-sm class-schedule" placeholder="VD: 2-4-6 (8h-10h)" required></td><td><input type="number" class="form-control form-control-sm class-capacity" value="30" min="1"></td><td></td></tr></tbody></table></div><p class="text-muted small mt-2 fst-italic">* Học viên sẽ chọn 1 trong các lớp này.</p></div></div><input type="hidden" name="classes" id="classesJson"><div class="text-end mt-3 border-top pt-3"><button class="btn btn-primary px-5 fw-bold">Đăng & Mở Lớp</button></div></form></div></div></div></div>
 
+    <div class="modal fade" id="logoutModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content border-0 shadow rounded-4 text-center p-3"><div class="mb-3 mt-2 text-warning"><i class="fas fa-sign-out-alt fa-3x"></i></div><h5 class="fw-bold mb-2">Đăng xuất?</h5><div class="d-flex gap-2 justify-content-center mt-4"><button type="button" class="btn btn-light fw-bold flex-fill rounded-pill" data-bs-dismiss="modal">Không</button><a href="/logout" class="btn btn-danger fw-bold flex-fill rounded-pill">Có</a></div></div></div></div>
+
+    <script>
+        function toggleKYCForm(){ const e=document.getElementById("kycType").value; const t=document.getElementById("studentFields"); const n=document.getElementById("teacherFields"); const setState=(div,active)=>{div.style.display=active?"block":"none";div.querySelectorAll("input").forEach(inp=>{inp.disabled=!active;if(active&&inp.type!=="file")inp.required=true;});}; if(e==="student_creator"){setState(t,true);setState(n,false);}else{setState(t,false);setState(n,true);} }
+        function previewFile(input, previewId) { const file=input.files[0]; if(file){ const reader=new FileReader(); reader.onload=function(e){const img=document.getElementById(previewId);img.src=e.target.result;img.style.display="block";input.closest('.drop-zone').classList.add('has-image');}; reader.readAsDataURL(file); } }
+        document.querySelectorAll('.drop-zone').forEach(zone=>{zone.addEventListener('dragover',(e)=>{e.preventDefault();zone.classList.add('drag-active');});zone.addEventListener('dragleave',()=>zone.classList.remove('drag-active'));zone.addEventListener('drop',(e)=>{e.preventDefault();zone.classList.remove('drag-active');const fileInput=zone.querySelector('input[type="file"]');const dt=e.dataTransfer;if(dt.files.length>0){fileInput.files=dt.files;const event=new Event('change');fileInput.dispatchEvent(event);}});});
+        function addClassRow(){ const container=document.getElementById('classesContainer'); const row=document.createElement('tr'); row.innerHTML=`<td><input type="text" class="form-control form-control-sm class-name" placeholder="VD: Lớp B" required></td><td><input type="text" class="form-control form-control-sm class-schedule" placeholder="VD: 3-5-7 (14h-16h)" required></td><td><input type="number" class="form-control form-control-sm class-capacity" value="30" min="1"></td><td><button type="button" class="btn btn-sm btn-link text-danger" onclick="this.closest('tr').remove()"><i class="fas fa-times"></i></button></td>`; container.appendChild(row); }
+        function prepareClassesData(e){ const rows=document.querySelectorAll('#classesContainer tr'); const classes=[]; rows.forEach(row=>{classes.push({name:row.querySelector('.class-name').value,schedule:row.querySelector('.class-schedule').value,capacity:row.querySelector('.class-capacity').value});}); document.getElementById('classesJson').value=JSON.stringify(classes); }
+        function confirmLogout(){ new bootstrap.Modal(document.getElementById('logoutModal')).show(); }
+    </script>
 </body>
 </html>
