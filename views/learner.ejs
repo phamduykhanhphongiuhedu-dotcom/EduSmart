@@ -1,292 +1,365 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <title>Góc học tập - EduLink AI</title>
+    <title>Góc Học Tập - EduSmart</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        .sidebar { width: 280px; height: 100vh; position: fixed; background: white; padding: 30px 24px; border-right: 1px solid #f1f5f9; z-index: 1000; }
-        .brand-logo { font-size: 1.5rem; font-weight: 800; color: #4f46e5; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .nav-link { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: #64748b; font-weight: 600; font-size: 1rem; border-radius: 12px; text-decoration: none; transition: 0.3s; margin-bottom: 8px; }
-        .nav-link:hover { background-color: #f8fafc; color: #4f46e5; cursor: pointer; }
-        .nav-link.active { background-color: #e0e7ff; color: #4f46e5; }
-        .main-content { margin-left: 280px; padding: 40px; }
-        
-        /* FIX LỖI CLICK: Đưa card lên lớp cao hơn */
-        .course-card { 
-            background: white; border-radius: 16px; overflow: hidden; 
-            border: 1px solid #f1f5f9; transition: 0.3s; cursor: pointer; 
-            position: relative; z-index: 10; 
-        }
-        .course-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-color: #4f46e5; }
-        .card-img { height: 160px; object-fit: cover; width: 100%; }
-        
-        /* Search container */
-        .search-container { position: relative; width: 100%; max-width: 400px; z-index: 50; }
-        .search-results { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 100; display: none; max-height: 300px; overflow-y: auto; margin-top: 5px; }
-        .search-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: 0.2s; }
-        .search-item:hover { background: #f8fafc; color: #4f46e5; padding-left: 25px; }
-        
-        .history-table th { font-weight: 600; color: #64748b; background: #f8fafc; padding: 15px; }
-        .history-table td { vertical-align: middle; padding: 15px; }
+    
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-        /* Avatar */
-        .avatar-container { position: relative; width: 45px; height: 45px; cursor: pointer; transition: transform 0.2s; z-index: 20; }
+    <style>
+        :root { --primary: #10b981; --primary-dark: #059669; --bg-body: #f0fdf4; --sidebar-bg: #064e3b; --sidebar-width: 270px; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-body); color: #334155; }
+        
+        /* SIDEBAR PRO */
+        .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; background: var(--sidebar-bg); padding: 24px; z-index: 1000; box-shadow: 4px 0 20px rgba(0,0,0,0.1); }
+        .nav-item { padding: 14px 20px; border-radius: 12px; color: #a7f3d0; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 14px; margin-bottom: 8px; transition: 0.3s; cursor: pointer; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; transform: translateX(5px); }
+        .nav-item.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
+        
+        .main-content { margin-left: var(--sidebar-width); padding: 40px; }
+        
+        /* CARDS */
+        .content-card { background: white; border-radius: 24px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+        .stat-card { background: white; padding: 24px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .stat-card:hover { transform: translateY(-5px); }
+        .icon-box { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+
+        /* COURSE CARD */
+        .course-card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; height: 100%; position: relative; }
+        .course-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); border-color: var(--primary); }
+        .card-img { height: 180px; object-fit: cover; width: 100%; }
+        
+        /* SEARCH */
+        .search-container { position: relative; max-width: 400px; }
+        .search-results { position: absolute; top: 100%; left: 0; width: 100%; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; display: none; margin-top: 5px; overflow: hidden; }
+        .search-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: 0.2s; }
+        .search-item:hover { background: #f0fdf4; color: var(--primary); }
+
+        /* CLASS SELECTION */
+        .class-option { border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .class-option:hover { border-color: #cbd5e1; background-color: #f8fafc; }
+        .class-option.selected { border-color: var(--primary); background-color: #ecfdf5; color: var(--primary-dark); }
+        .class-option.disabled { opacity: 0.5; pointer-events: none; background-color: #f1f5f9; }
+
+        /* AVATAR */
+        .avatar-container { width: 48px; height: 48px; position: relative; cursor: pointer; transition: transform 0.2s; }
         .avatar-container:hover { transform: scale(1.1); }
-        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #e0e7ff; }
-        .avatar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); border-radius: 50%; display: none; align-items: center; justify-content: center; color: white; font-size: 0.8rem; }
-        .avatar-container:hover .avatar-overlay { display: flex; }
-        .class-option { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 15px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
-        .class-option:hover { background-color: #f8fafc; border-color: #cbd5e1; }
-        .class-option.selected { border-color: #4f46e5; background-color: #e0e7ff; color: #4f46e5; }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <a href="/" class="brand-logo"><i class="fas fa-cube"></i> EduLink AI</a>
-        <div class="nav flex-column">
-            <a href="/learner?tab=overview" class="nav-link <%= currentTab === 'overview' ? 'active' : '' %>"><i class="fas fa-th-large"></i> Tổng quan</a>
-            <a href="/learner?tab=courses" class="nav-link <%= currentTab === 'courses' ? 'active' : '' %>"><i class="fas fa-book-open"></i> Khóa học của tôi</a>
-            <a href="/learner?tab=history" class="nav-link <%= currentTab === 'history' ? 'active' : '' %>"><i class="fas fa-history"></i> Lịch sử học</a>
+        <div class="d-flex align-items-center gap-3 mb-5 px-2">
+            <div class="bg-white text-success rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 45px; height: 45px;"><i class="fas fa-graduation-cap"></i></div>
+            <div>
+                <h5 class="fw-bold mb-0 text-white">EduLearner</h5>
+                <small class="text-white opacity-50" style="font-size: 0.75rem">Cổng thông tin học viên</small>
+            </div>
         </div>
-        <div style="margin-top: auto; padding-top: 100px;">
-            <div class="nav-link text-danger" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</div>
+        
+        <a href="/learner?tab=dashboard" class="nav-item <%= currentTab === 'dashboard' || currentTab === 'overview' ? 'active' : '' %>"><i class="fas fa-th-large"></i> Bảng điều khiển</a>
+        <a href="/learner?tab=schedule" class="nav-item <%= currentTab === 'schedule' ? 'active' : '' %>"><i class="fas fa-calendar-alt"></i> Thời khóa biểu</a>
+        <a href="/learner?tab=courses" class="nav-item <%= currentTab === 'courses' ? 'active' : '' %>"><i class="fas fa-book-reader"></i> Lớp học của tôi</a>
+        <a href="/learner?tab=market" class="nav-item <%= currentTab === 'market' ? 'active' : '' %>"><i class="fas fa-shopping-cart"></i> Đăng ký môn mới</a>
+        <a href="/learner?tab=wallet" class="nav-item <%= currentTab === 'wallet' ? 'active' : '' %>"><i class="fas fa-wallet"></i> Ví & Lịch sử</a>
+        
+        <div style="margin-top: auto; padding-top: 50px;">
+            <div class="nav-item text-danger bg-transparent" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</div>
         </div>
     </div>
 
     <div class="main-content">
         <header class="d-flex justify-content-between align-items-center mb-5">
             <div>
-                <h2 class="fw-bold text-dark mb-2">
-                    <% if(currentTab === 'overview') { %> Tổng quan <% } %>
-                    <% if(currentTab === 'courses') { %> Khóa học của tôi <% } %>
-                    <% if(currentTab === 'history') { %> Lịch sử học tập <% } %>
+                <h2 class="fw-bold mb-1 text-dark">
+                    <% if(currentTab==='dashboard' || currentTab==='overview') { %>Xin chào, <%= user.nickname %>! 👋<% } %>
+                    <% if(currentTab==='schedule') { %>Thời khóa biểu<% } %>
+                    <% if(currentTab==='courses') { %>Lớp học của tôi<% } %>
+                    <% if(currentTab==='market') { %>Kho khóa học<% } %>
+                    <% if(currentTab==='wallet') { %>Ví Token<% } %>
                 </h2>
-                <div class="search-container">
-                    <div class="input-group"><span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3"><i class="fas fa-search text-muted"></i></span><input type="text" id="searchInput" class="form-control border-start-0 rounded-end-pill py-2" placeholder="Tìm khóa học..." onkeyup="searchCourse()" autocomplete="off"></div>
-                    <div id="searchResults" class="search-results"></div>
-                </div>
+                <p class="text-muted mb-0">Chúc bạn một ngày học tập hiệu quả.</p>
             </div>
-            <div class="d-flex align-items-center gap-3">
-                <div class="bg-white px-3 py-2 rounded-pill shadow-sm border fw-bold text-warning"><i class="fas fa-coins"></i> <%= user.wallet_tokens %> Token</div>
-                <div class="fw-bold text-primary"><%= user.nickname %></div>
-                <div class="avatar-container" id="avatarArea" title="Click để đổi ảnh">
-                    <% if(user.avatar && user.avatar !== '/default-avatar.png') { %>
-                        <img src="<%= user.avatar %>" class="avatar-img" id="avatarPreview">
-                    <% } else { %>
-                        <div class="avatar-img bg-primary text-white d-flex align-items-center justify-content-center fw-bold" id="avatarLetter" style="font-size: 1.2rem;"><%= user.nickname.charAt(0).toUpperCase() %></div>
-                        <img src="" class="avatar-img d-none" id="avatarPreview">
-                    <% } %>
-                    <div class="avatar-overlay"><i class="fas fa-camera"></i></div>
+            <div class="d-flex align-items-center gap-4">
+                <div class="bg-white px-4 py-2 rounded-pill shadow-sm border d-flex align-items-center gap-2">
+                    <i class="fas fa-coins text-warning fs-5"></i>
+                    <div>
+                        <div class="small text-muted fw-bold" style="font-size: 0.7rem; line-height: 1;">SỐ DƯ</div>
+                        <div class="fw-bold text-dark"><%= user.wallet_tokens %> Token</div>
+                    </div>
+                </div>
+                <div class="avatar-container" id="avatarArea" title="Đổi ảnh đại diện">
+                    <img src="<%= user.avatar %>" class="avatar-img" id="avatarPreview">
                     <input type="file" id="avatarInput" hidden accept="image/*">
                 </div>
             </div>
         </header>
 
-        <% if (currentTab === 'overview') { %>
-            <div class="p-4 bg-primary text-white rounded-4 shadow-sm mb-5" style="background: linear-gradient(135deg, #4f46e5, #818cf8);">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div><h3>Chào mừng quay trở lại! 🚀</h3><p class="mb-0 opacity-75">Bạn đang có <%= myCourses.length %> khóa học đang kích hoạt.</p></div>
-                    <button class="btn btn-light text-primary fw-bold rounded-pill px-4">Nạp Token</button>
-                </div>
-            </div>
-            <h5 class="fw-bold mb-3">Gợi ý khóa học mới (Đánh giá thật)</h5>
-            <div class="row g-4">
-                <% suggestedCourses.slice(0, 8).forEach(course => { %>
-                <div class="col-md-3">
-                    <div class="course-card h-100" onclick="showCourseDetail('<%= course.id %>')">
-                        <img src="<%= course.image_url %>" class="card-img">
-                        <div class="p-3">
-                            <h6 class="fw-bold mb-1 text-truncate"><%= course.title %></h6>
-                            <div class="small text-muted mb-2">GV: <%= course.teacher_name %></div>
-                            <div class="d-flex align-items-center gap-1 mb-3 small"><i class="fas fa-star text-warning"></i><span class="fw-bold"><%= course.rating || '0.0' %></span><span class="text-muted">(<%= course.reviewCount || 0 %>)</span></div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="fw-bold text-primary"><%= course.price_tokens %> Token</span>
-                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3">Xem chi tiết</button>
-                            </div>
-                        </div>
+        <% if (currentTab === 'dashboard' || currentTab === 'overview') { %>
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div><h2 class="fw-bold mb-0 text-dark"><%= stats.activeCourses %></h2><small class="text-muted fw-bold">KHÓA ĐANG HỌC</small></div>
+                        <div class="icon-box bg-success bg-opacity-10 text-success"><i class="fas fa-book-open"></i></div>
                     </div>
                 </div>
-                <% }); %>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div><h2 class="fw-bold mb-0 text-dark"><%= stats.classesAttended %></h2><small class="text-muted fw-bold">BUỔI ĐÃ HỌC</small></div>
+                        <div class="icon-box bg-primary bg-opacity-10 text-primary"><i class="fas fa-check-circle"></i></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div><h2 class="fw-bold mb-0 text-dark"><%= stats.totalSpent %></h2><small class="text-muted fw-bold">TOKEN ĐÃ TIÊU</small></div>
+                        <div class="icon-box bg-warning bg-opacity-10 text-warning"><i class="fas fa-wallet"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="content-card p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0">📅 Lịch học hôm nay</h5>
+                            <span class="badge bg-light text-dark border"><%= new Date().toLocaleDateString('vi-VN') %></span>
+                        </div>
+                        <% if(upcomingClasses && upcomingClasses.length > 0) { %>
+                            <% upcomingClasses.forEach(cls => { %>
+                                <div class="d-flex align-items-center p-3 bg-light rounded-3 border mb-3">
+                                    <div class="bg-white p-3 rounded-3 text-center border me-3" style="min-width: 80px;">
+                                        <div class="fw-bold text-primary"><%= cls.time.split('-')[0] %></div>
+                                        <small class="text-muted">Bắt đầu</small>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-1"><%= cls.className %></h6>
+                                        <div class="text-muted small"><i class="fas fa-cube me-1"></i> <%= cls.courseName %></div>
+                                    </div>
+                                    <a href="<%= cls.link %>" target="_blank" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Vào học <i class="fas fa-arrow-right ms-1"></i></a>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="text-center py-5">
+                                <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" class="mb-3 opacity-50">
+                                <p class="text-muted fw-bold">Hôm nay bạn không có lịch học nào.</p>
+                                <a href="/learner?tab=market" class="btn btn-outline-primary rounded-pill">Tìm khóa học mới</a>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="content-card p-4 h-100 text-center">
+                        <h5 class="fw-bold mb-4">Mục tiêu tuần này</h5>
+                        <div style="width: 150px; height: 150px; margin: 0 auto;" class="position-relative d-flex align-items-center justify-content-center">
+                            <canvas id="goalChart"></canvas>
+                            <div class="position-absolute fw-bold fs-4">80%</div>
+                        </div>
+                        <p class="text-muted small mt-3">Bạn đã hoàn thành 4/5 buổi học dự kiến.</p>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <% if (currentTab === 'schedule') { %>
+            <div class="content-card p-4">
+                <div id='calendar'></div>
             </div>
         <% } %>
 
         <% if (currentTab === 'courses') { %>
-            <% if (myCourses.length > 0) { %>
+            <div class="content-card p-4">
                 <div class="row g-4">
-                    <% myCourses.forEach(course => { %>
-                    <div class="col-md-4">
-                        <div class="course-card h-100 cursor-default">
-                            <img src="<%= course.image_url %>" class="card-img">
-                            <div class="p-3 d-flex flex-column h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <span class="badge bg-success bg-opacity-10 text-success">Đang học</span>
-                                    <span class="badge bg-light text-dark border"><%= course.className %></span>
+                    <% if(myCourses.length > 0) { %>
+                        <% myCourses.forEach(c => { %>
+                            <div class="col-md-4">
+                                <div class="course-card h-100 d-flex flex-column">
+                                    <img src="<%= c.image_url || 'https://via.placeholder.com/300x150' %>" class="card-img">
+                                    <div class="p-4 flex-grow-1 d-flex flex-column">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success">Đang hoạt động</span>
+                                        </div>
+                                        <h5 class="fw-bold mb-1"><%= c.title %></h5>
+                                        <p class="text-primary fw-bold small mb-3"><i class="fas fa-chalkboard me-1"></i> Lớp: <%= c.className %></p>
+                                        
+                                        <div class="mt-auto">
+                                            <div class="d-flex align-items-center text-muted small mb-2"><i class="far fa-clock me-2 w-25px"></i> <%= c.schedule %></div>
+                                            <div class="d-flex align-items-center text-muted small mb-3"><i class="far fa-calendar-alt me-2 w-25px"></i> <%= c.startDate %> &rarr; <%= c.endDate %></div>
+                                            <a href="<%= c.meetingUrl %>" target="_blank" class="btn btn-outline-primary w-100 fw-bold py-2 rounded-3">Vào phòng học</a>
+                                        </div>
+                                    </div>
                                 </div>
-                                <h5 class="fw-bold mb-1"><%= course.title %></h5>
-                                <p class="text-muted small mb-3">GV: <%= course.teacher_name %></p>
-                                <div class="progress mb-3" style="height: 6px;"><div class="progress-bar bg-primary" style="width: 30%"></div></div>
-                                <div class="mt-auto d-grid gap-2">
-                                    <button class="btn btn-outline-warning rounded-pill fw-bold" onclick="openRateModal('<%= course.id %>', '<%= course.title %>')"><i class="fas fa-star"></i> Đánh giá</button>
-                                    <button class="btn btn-primary rounded-pill">Vào lớp học</button>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="text-center py-5"><p class="text-muted">Chưa đăng ký khóa nào.</p><a href="/learner?tab=market" class="btn btn-primary">Đăng ký ngay</a></div>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+
+        <% if (currentTab === 'market') { %>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Khám phá khóa học</h5>
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="form-control rounded-pill px-4" placeholder="Tìm môn học..." onkeyup="searchCourse()">
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+            </div>
+            <div class="row g-4">
+                <% if(suggestedCourses.length > 0) { %>
+                    <% suggestedCourses.forEach(c => { %>
+                        <div class="col-md-3">
+                            <div class="course-card h-100 d-flex flex-column">
+                                <img src="<%= c.image_url || 'https://via.placeholder.com/300x150' %>" class="card-img">
+                                <div class="p-3 flex-grow-1 d-flex flex-column">
+                                    <h6 class="fw-bold mb-1"><%= c.title %></h6>
+                                    <div class="small text-muted mb-2">GV: <%= c.teacher_name %></div>
+                                    <div class="fw-bold text-warning fs-5 mb-3"><%= c.price_tokens %> Token</div>
+                                    <button class="btn btn-primary w-100 rounded-pill mt-auto fw-bold" onclick="openEnrollModal('<%= JSON.stringify(c) %>')">Xem lớp & Đăng ký</button>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     <% }); %>
-                </div>
-            <% } else { %>
-                <div class="text-center py-5"><i class="fas fa-folder-open fa-3x text-muted mb-3"></i><h5>Bạn chưa đăng ký khóa học nào</h5><a href="/learner?tab=overview" class="btn btn-primary mt-2">Tìm khóa học ngay</a></div>
-            <% } %>
+                <% } else { %><div class="col-12 text-center text-muted">Không tìm thấy khóa học mới.</div><% } %>
+            </div>
         <% } %>
 
-        <% if (currentTab === 'history') { %>
-            <div class="card border-0 shadow-sm rounded-4"><div class="card-header bg-white border-bottom-0 py-3"><h5 class="fw-bold mb-0">Nhật ký hoạt động</h5></div><div class="card-body p-0"><table class="table history-table mb-0 table-hover"><thead class="table-light"><tr><th class="ps-4">Thời gian</th><th>Hoạt động</th><th>Khóa học</th><th class="text-end pe-4">Biến động</th></tr></thead><tbody><% if (historyLogs && historyLogs.length > 0) { %><% historyLogs.forEach(log => { %><tr><td class="ps-4 text-muted small"><% let dateDisplay = "Vừa xong"; try { dateDisplay = new Date(log.checkin_time).toLocaleString('vi-VN'); } catch(e) {} %><i class="far fa-clock me-1"></i> <%= dateDisplay %></td><td><span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3"><i class="fas fa-check-circle"></i> Điểm danh</span></td><td class="fw-bold text-dark"><%= log.course_title %></td><td class="text-end pe-4 text-danger fw-bold">- <%= log.tokens_deducted %> Token</td></tr><% }); %><% } else { %><tr><td colspan="4" class="text-center py-5"><div class="text-muted opacity-50 mb-2"><i class="fas fa-history fa-3x"></i></div><p class="text-muted mb-0">Chưa có lịch sử học tập nào.</p></td></tr><% } %></tbody></table></div></div>
+        <% if (currentTab === 'wallet') { %>
+            <div class="row g-4 mb-4">
+                <div class="col-md-6"><div class="stat-card bg-primary text-white h-100"><div><small class="opacity-75 fw-bold">SỐ DƯ HIỆN TẠI</small><h2 class="fw-bold mb-0 mt-2"><%= user.wallet_tokens %> Token</h2></div></div></div>
+                <div class="col-md-6"><div class="stat-card h-100"><div><small class="text-muted fw-bold">TỔNG ĐÃ NẠP</small><h2 class="fw-bold mb-0 mt-2">--</h2></div><button class="btn btn-dark fw-bold">Nạp thêm</button></div></div>
+            </div>
+            <div class="content-card">
+                <div class="p-4 border-bottom"><h5 class="fw-bold mb-0">Lịch sử giao dịch</h5></div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light"><tr><th class="ps-4">Thời gian</th><th>Hoạt động</th><th>Chi tiết</th><th>Biến động</th></tr></thead>
+                        <tbody>
+                            <% if(historyLogs.length > 0) { %>
+                                <% historyLogs.forEach(log => { %>
+                                    <tr>
+                                        <td class="ps-4 text-muted small"><%= new Date(log.checkin_time).toLocaleString('vi-VN') %></td>
+                                        <td><span class="badge bg-light text-dark border">Điểm danh</span></td>
+                                        <td class="fw-bold"><%= log.course_title %></td>
+                                        <td class="fw-bold text-danger">-<%= log.tokens_deducted %> Token</td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %><tr><td colspan="4" class="text-center py-5 text-muted">Chưa có giao dịch.</td></tr><% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         <% } %>
     </div>
 
-    <div class="modal fade" id="courseDetailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg overflow-hidden" style="border-radius: 20px;">
-                <div class="modal-body p-0">
-                    <div class="row g-0">
-                        <div class="col-md-5 bg-light p-4 text-center d-flex flex-column justify-content-center">
-                            <img id="detailImg" src="" class="img-fluid rounded-3 shadow-sm mb-3">
-                            <h2 class="fw-bold text-primary mb-0" id="detailPrice">0 Token</h2>
-                            <small class="text-muted">Học phí trọn gói</small>
-                        </div>
-                        <div class="col-md-7 p-4">
-                            <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button>
-                            <h3 class="fw-bold mb-2" id="detailTitle">Title</h3>
-                            <div class="text-muted small mb-3"><i class="fas fa-chalkboard-teacher text-primary"></i> <span id="detailTeacher">GV</span></div>
-                            <div class="d-flex gap-3 mb-4">
-                                <div class="bg-light rounded-3 p-2 px-3 text-center border flex-fill"><div class="h4 fw-bold text-warning mb-0" id="rateCourse">0.0</div><small class="text-muted fw-bold" style="font-size: 0.7rem">ĐIỂM MÔN HỌC</small></div>
-                                <div class="bg-light rounded-3 p-2 px-3 text-center border flex-fill"><div class="h4 fw-bold text-warning mb-0" id="rateTeacher">0.0</div><small class="text-muted fw-bold" style="font-size: 0.7rem">ĐIỂM GIÁO VIÊN</small></div>
-                            </div>
-                            <div class="mb-4">
-                                <label class="fw-bold small mb-2 text-dark">Chọn lịch học phù hợp:</label>
-                                <div id="classListContainer"></div>
-                            </div>
-                            <form action="/enroll" method="POST" onsubmit="return validateClassSelection()">
-                                <input type="hidden" name="courseId" id="inputEnrollId">
-                                <input type="hidden" name="classId" id="inputClassId">
-                                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 shadow-sm" id="btnEnroll" disabled>Vui lòng chọn lớp</button>
-                            </form>
-                        </div>
-                    </div>
+    <div class="modal fade" id="enrollModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">Chọn lớp học</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body p-4">
+                    <h4 class="fw-bold text-primary mb-1" id="enrollTitle">Title</h4>
+                    <p class="text-muted small mb-4">Vui lòng chọn lịch học phù hợp với bạn:</p>
+                    <div id="classOptionsContainer"></div>
+                    <form action="/enroll" method="POST" id="enrollForm">
+                        <input type="hidden" name="courseId" id="enrollCourseId">
+                        <input type="hidden" name="classId" id="enrollClassId">
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 mt-3" id="btnConfirmEnroll" disabled>Xác nhận Đăng ký</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="rateModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow" style="border-radius: 20px;"><div class="modal-header border-0"><h5 class="modal-title fw-bold">Đánh giá chất lượng</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form action="/submit-review" method="POST"><input type="hidden" name="courseId" id="rateCourseId"><h5 class="text-center fw-bold text-primary mb-4" id="rateCourseTitle">Tên khóa học</h5><div class="row mb-3"><div class="col-6"><label class="d-block fw-bold small mb-2 text-center">Chất lượng môn học</label><select name="course_rating" class="form-select text-center fw-bold text-warning"><option value="5">5 ⭐ Xuất sắc</option><option value="4">4 ⭐ Tốt</option><option value="3">3 ⭐ Khá</option><option value="2">2 ⭐ TB</option><option value="1">1 ⭐ Kém</option></select></div><div class="col-6"><label class="d-block fw-bold small mb-2 text-center">Giáo viên dạy</label><select name="teacher_rating" class="form-select text-center fw-bold text-warning"><option value="5">5 ⭐ Nhiệt tình</option><option value="4">4 ⭐ Dễ hiểu</option><option value="3">3 ⭐ Bình thường</option><option value="2">2 ⭐ Khó hiểu</option><option value="1">1 ⭐ Tệ</option></select></div></div><div class="mb-3"><label class="fw-bold small mb-1">Nhận xét chi tiết</label><textarea name="comment" class="form-control bg-light" rows="3" placeholder="Chia sẻ cảm nhận..." required></textarea></div><button class="btn btn-warning w-100 fw-bold py-2 rounded-3">Gửi đánh giá</button></form></div></div></div></div>
+    <div class="modal fade" id="logoutModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content text-center p-3"><h5 class="mb-3">Đăng xuất?</h5><div class="d-flex gap-2 justify-content-center"><button class="btn btn-light flex-fill" data-bs-dismiss="modal">Không</button><a href="/logout" class="btn btn-danger flex-fill">Có</a></div></div></div></div>
 
-    <div class="modal fade" id="logoutModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content border-0 shadow rounded-4 text-center p-3"><div class="mb-3 mt-2 text-warning"><i class="fas fa-sign-out-alt fa-3x"></i></div><h5 class="fw-bold mb-2">Đăng xuất?</h5><div class="d-flex gap-2 justify-content-center mt-4"><button type="button" class="btn btn-light fw-bold flex-fill rounded-pill" data-bs-dismiss="modal">Không</button><a href="/logout" class="btn btn-danger fw-bold flex-fill rounded-pill">Có</a></div></div></div></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const userTokens = <%= user.wallet_tokens %>;
+        // FULLCALENDAR INIT
+        <% if (typeof calendarEvents !== 'undefined') { %>
+            document.addEventListener('DOMContentLoaded', function() {
+                var calendarEl = document.getElementById('calendar');
+                if (calendarEl) {
+                    var calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'timeGridWeek', locale: 'vi', firstDay: 1,
+                        headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
+                        events: <%- JSON.stringify(calendarEvents) %>, slotMinTime: "07:00:00", slotMaxTime: "22:00:00",
+                        height: 650, allDaySlot: false,
+                        eventClick: function(info) { if (info.event.url) { window.open(info.event.url); info.jsEvent.preventDefault(); } }
+                    });
+                    calendar.render();
+                }
+            });
+        <% } %>
 
-        // UPLOAD AVATAR
+        // GOAL CHART
+        <% if (currentTab === 'dashboard' || currentTab === 'overview') { %>
+            new Chart(document.getElementById('goalChart'), {
+                type: 'doughnut',
+                data: { labels: ['Hoàn thành', 'Còn lại'], datasets: [{ data: [80, 20], backgroundColor: ['#10b981', '#e2e8f0'], borderWidth: 0 }] },
+                options: { cutout: '80%', plugins: { legend: { display: false } } }
+            });
+        <% } %>
+
+        // SEARCH & AVATAR
         const avatarArea = document.getElementById('avatarArea');
         const avatarInput = document.getElementById('avatarInput');
-        const avatarPreview = document.getElementById('avatarPreview');
-        const avatarLetter = document.getElementById('avatarLetter');
-        avatarArea.addEventListener('click', () => avatarInput.click());
-        avatarArea.addEventListener('dragover', (e) => { e.preventDefault(); avatarArea.classList.add('avatar-drag-active'); });
-        avatarArea.addEventListener('dragleave', () => avatarArea.classList.remove('avatar-drag-active'));
-        avatarArea.addEventListener('drop', (e) => {
-            e.preventDefault(); avatarArea.classList.remove('avatar-drag-active');
-            if(e.dataTransfer.files.length > 0) handleFileUpload(e.dataTransfer.files[0]);
-        });
-        avatarInput.addEventListener('change', () => { if(avatarInput.files.length > 0) handleFileUpload(avatarInput.files[0]); });
-        async function handleFileUpload(file) {
-            const formData = new FormData(); formData.append('avatar', file);
-            try { const res = await fetch('/upload-avatar', { method: 'POST', body: formData }); const data = await res.json();
-                if(data.success) { avatarPreview.src = data.newAvatar; avatarPreview.classList.remove('d-none'); if(avatarLetter) avatarLetter.classList.add('d-none'); } 
-                else { alert('Lỗi: ' + data.message); }
-            } catch (err) { alert('Lỗi upload ảnh!'); }
+        if(avatarArea) {
+            avatarArea.onclick = () => avatarInput.click();
+            avatarInput.onchange = async () => {
+                if(avatarInput.files.length > 0) {
+                    const fd = new FormData(); fd.append('avatar', avatarInput.files[0]);
+                    const res = await fetch('/upload-avatar', {method:'POST', body:fd});
+                    const d = await res.json();
+                    if(d.success) document.getElementById('avatarPreview').src = d.newAvatar;
+                }
+            };
         }
 
-        // TÌM KIẾM
-        async function searchCourse() {
-            const query = document.getElementById('searchInput').value;
-            const resultBox = document.getElementById('searchResults');
-            if (query.length < 2) { resultBox.style.display = 'none'; return; }
-            const res = await fetch(`/api/search?q=${query}`); const courses = await res.json();
-            resultBox.innerHTML = '';
-            if (courses.length > 0) {
-                resultBox.style.display = 'block';
-                courses.forEach(c => {
-                    const div = document.createElement('div'); div.className = 'search-item';
-                    div.innerHTML = `<i class="fas fa-book-open me-2 text-muted"></i> <b>${c.title}</b>`;
-                    div.onclick = () => showCourseDetail(c.id);
-                    resultBox.appendChild(div);
-                });
-            } else { resultBox.style.display = 'none'; }
-        }
-
-        // HIỆN CHI TIẾT
-        async function showCourseDetail(id) {
-            document.getElementById('searchResults').style.display = 'none';
-            const res = await fetch(`/api/course/${id}`);
-            const data = await res.json();
+        // ENROLL LOGIC
+        function openEnrollModal(courseJson) {
+            const c = JSON.parse(courseJson);
+            document.getElementById('enrollTitle').innerText = c.title;
+            document.getElementById('enrollCourseId').value = c.id;
             
-            document.getElementById('detailTitle').innerText = data.title;
-            document.getElementById('detailTeacher').innerText = data.teacher_name;
-            document.getElementById('detailImg').src = data.image_url;
-            document.getElementById('detailPrice').innerHTML = `${data.price_tokens} Token <span class="fs-6 text-muted fw-normal">/ 1 Buổi</span>`;
-            document.getElementById('rateCourse').innerText = data.stats.avgCourse;
-            document.getElementById('rateTeacher').innerText = data.stats.avgTeacher;
-            
-            const classContainer = document.getElementById('classListContainer');
-            classContainer.innerHTML = '';
-            const btnEnroll = document.getElementById('btnEnroll');
-            btnEnroll.disabled = true;
-            btnEnroll.innerText = "Vui lòng chọn lớp";
+            const container = document.getElementById('classOptionsContainer');
+            container.innerHTML = '';
+            const btn = document.getElementById('btnConfirmEnroll');
+            btn.disabled = true;
+            btn.innerText = "Vui lòng chọn lớp";
 
-            if (data.classes && data.classes.length > 0) {
-                data.classes.forEach(cls => {
-                    const available = cls.capacity - cls.enrolled;
-                    const isFull = available <= 0;
+            if (c.availableClasses && c.availableClasses.length > 0) {
+                c.availableClasses.forEach(cls => {
                     const div = document.createElement('div');
-                    div.className = `class-option ${isFull ? 'opacity-50' : ''}`;
-                    div.innerHTML = `<div><div class="fw-bold text-dark">${cls.name}</div><div class="small text-muted"><i class="far fa-clock me-1"></i> ${cls.schedule}</div></div><div class="text-end"><div class="fw-bold ${isFull ? 'text-danger' : 'text-success'} small">${isFull ? 'Đã đầy' : `Còn ${available} chỗ`}</div></div>`;
-                    
-                    if (!isFull) {
-                        div.onclick = () => {
-                            document.querySelectorAll('.class-option').forEach(el => el.classList.remove('selected'));
-                            div.classList.add('selected');
-                            document.getElementById('inputClassId').value = cls.id;
-                            btnEnroll.disabled = false;
-                            btnEnroll.innerText = "Đăng ký tham gia lớp";
-                        };
-                    }
-                    classContainer.appendChild(div);
+                    div.className = 'class-option';
+                    div.innerHTML = `
+                        <div>
+                            <div class="fw-bold text-dark">${cls.name}</div>
+                            <div class="small text-muted"><i class="far fa-clock me-1"></i> ${cls.schedule}</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-success small">Còn ${cls.capacity - cls.enrolled} chỗ</div>
+                        </div>
+                    `;
+                    div.onclick = () => {
+                        document.querySelectorAll('.class-option').forEach(el => el.classList.remove('selected'));
+                        div.classList.add('selected');
+                        document.getElementById('enrollClassId').value = cls.id;
+                        btn.disabled = false;
+                        btn.innerText = `Đăng ký lớp ${cls.name}`;
+                    };
+                    container.appendChild(div);
                 });
             } else {
-                classContainer.innerHTML = '<div class="text-muted small fst-italic">Hiện chưa có lớp nào mở đăng ký.</div>';
+                container.innerHTML = '<div class="text-center text-muted py-3">Hiện chưa có lớp nào mở.</div>';
             }
-
-            document.getElementById('inputEnrollId').value = data.id;
-            new bootstrap.Modal(document.getElementById('courseDetailModal')).show();
-        }
-
-        function validateClassSelection() {
-            const classId = document.getElementById('inputClassId').value;
-            if (!classId) { alert("Bạn phải chọn một lớp học để đăng ký!"); return false; }
-            return true;
+            
+            new bootstrap.Modal(document.getElementById('enrollModal')).show();
         }
 
         function confirmLogout() { new bootstrap.Modal(document.getElementById('logoutModal')).show(); }
-        function openRateModal(id, title) {
-            document.getElementById('rateCourseId').value = id;
-            document.getElementById('rateCourseTitle').innerText = title;
-            new bootstrap.Modal(document.getElementById('rateModal')).show();
-        }
     </script>
 </body>
 </html>
