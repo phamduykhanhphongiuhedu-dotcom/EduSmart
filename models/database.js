@@ -14,10 +14,13 @@ const User = sequelize.define('user', {
     password: { type: Sequelize.STRING },
     role: { type: Sequelize.STRING },
     wallet_tokens: { type: Sequelize.INTEGER, defaultValue: 10 },
-    kyc_status: { type: Sequelize.STRING, defaultValue: 'none' }, // none, pending, approved, rejected
+    
+    // KYC Fields
+    kyc_status: { type: Sequelize.STRING, defaultValue: 'none' }, 
     kyc_type: { type: Sequelize.STRING }, 
-    kyc_data: { type: Sequelize.TEXT }, // Lưu JSON thông tin chữ
-    kyc_images: { type: Sequelize.TEXT }, // [MỚI] Lưu JSON đường dẫn ảnh KYC
+    kyc_data: { type: Sequelize.TEXT }, 
+    kyc_images: { type: Sequelize.TEXT }, 
+    
     is_verified: { type: Sequelize.BOOLEAN, defaultValue: false },
     avatar: { type: Sequelize.STRING, defaultValue: '/default-avatar.png' }
 });
@@ -29,29 +32,33 @@ const Course = sequelize.define('course', {
     image_url: { type: Sequelize.STRING },
     teacher_id: { type: Sequelize.INTEGER },
     teacher_name: { type: Sequelize.STRING },
-    start_date: { type: Sequelize.DATE, defaultValue: Sequelize.NOW }
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.NOW }
 });
 
-// [MỚI] Bảng Lớp học
 const Class = sequelize.define('class', {
-    name: { type: Sequelize.STRING }, // VD: Lớp Sáng 2-4-6 (8h-10h)
-    schedule: { type: Sequelize.STRING }, // Chi tiết giờ
-    capacity: { type: Sequelize.INTEGER, defaultValue: 30 }, // Số lượng tối đa
-    enrolled: { type: Sequelize.INTEGER, defaultValue: 0 }, // Số lượng đã đăng ký
-    course_id: { type: Sequelize.INTEGER }
+    name: { type: Sequelize.STRING },
+    schedule: { type: Sequelize.STRING }, // Format: "2,4,6 (08:00-10:00)"
+    
+    // Lộ trình học
+    start_date: { type: Sequelize.DATEONLY }, 
+    end_date: { type: Sequelize.DATEONLY },   
+    
+    capacity: { type: Sequelize.INTEGER, defaultValue: 30 },
+    enrolled: { type: Sequelize.INTEGER, defaultValue: 0 },
+    course_id: { type: Sequelize.INTEGER },
+    meeting_url: { type: Sequelize.STRING }
 });
 
-// [CẬP NHẬT] Đăng ký phải gắn với 1 Lớp cụ thể
 const Enrollment = sequelize.define('enrollment', {
     student_id: { type: Sequelize.INTEGER },
     course_id: { type: Sequelize.INTEGER },
-    class_id: { type: Sequelize.INTEGER } // [MỚI] Học viên thuộc lớp nào
+    class_id: { type: Sequelize.INTEGER } 
 });
 
 const Attendance = sequelize.define('attendance', {
     student_id: { type: Sequelize.INTEGER },
     course_id: { type: Sequelize.INTEGER },
-    class_id: { type: Sequelize.INTEGER }, // [MỚI]
+    class_id: { type: Sequelize.INTEGER },
     course_title: { type: Sequelize.STRING },
     tokens_deducted: { type: Sequelize.INTEGER },
     checkin_time: { type: Sequelize.DATE, defaultValue: Sequelize.NOW }
@@ -66,8 +73,23 @@ const Review = sequelize.define('review', {
     comment: { type: Sequelize.STRING }
 });
 
-// Thiết lập quan hệ
+const Recording = sequelize.define('recording', {
+    course_id: { type: Sequelize.INTEGER },
+    class_id: { type: Sequelize.INTEGER },
+    class_name: { type: Sequelize.STRING },
+    video_path: { type: Sequelize.STRING },
+    file_name: { type: Sequelize.STRING },
+    recorded_at: { type: Sequelize.DATE, defaultValue: Sequelize.NOW },
+    allow_download: { type: Sequelize.BOOLEAN, defaultValue: false }
+});
+
+// Associations
 Course.hasMany(Class, { foreignKey: 'course_id' });
 Class.belongsTo(Course, { foreignKey: 'course_id' });
+Course.hasMany(Recording, { foreignKey: 'course_id' }); 
 
-module.exports = { sequelize, User, Course, Class, Enrollment, Attendance, Review, Op };
+Enrollment.belongsTo(User, { foreignKey: 'student_id' });
+Enrollment.belongsTo(Class, { foreignKey: 'class_id' });
+Enrollment.belongsTo(Course, { foreignKey: 'course_id' });
+
+module.exports = { sequelize, User, Course, Class, Enrollment, Attendance, Review, Recording, Op };
